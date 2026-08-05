@@ -31,7 +31,7 @@ usage() {
   reel_host.sh add <account> <video-file>  動画を公開して URL を出す
   reel_host.sh url <account> <name>        公開 URL を組み立てて出す
   reel_host.sh list [account]              ホスティング中の動画を出す
-  reel_host.sh clean [account]             投稿済み動画を消す（省略時は全アカウント）
+  reel_host.sh clean [account] [name]      投稿済み動画を消す（省略時は全アカウント）
 
 アカウントごとに videos/<account>/ に分けて置く。例:
   reel_host.sh add aoyagi ~/Movies/reel001.mp4
@@ -123,18 +123,23 @@ cmd_list() {
 }
 
 cmd_clean() {
-	local account="${1:-}" target="$VIDEO_DIR"
+	local account="${1:-}" name="${2:-}" target="$VIDEO_DIR"
 	if [ -n "$account" ]; then
 		validate_account "$account"
 		target="$VIDEO_DIR/$account"
+		# 複数本ホスティング中に1本だけ投稿した場合、アカウント一括で消すと
+		# まだ投稿していない分まで巻き添えになる。名前を渡せば1本だけ消せる。
+		if [ -n "$name" ]; then
+			target="$target/$(safe_name "$name")"
+		fi
 	fi
 
 	require_branch
 
-	[ -d "$REPO_ROOT/$target" ] || {
+	if [ ! -e "$REPO_ROOT/$target" ]; then
 		printf '消すものが無い\n' >&2
 		return 0
-	}
+	fi
 
 	git -C "$REPO_ROOT" rm -rq --ignore-unmatch -- "$target"
 	rm -rf "${REPO_ROOT:?}/$target"
@@ -142,7 +147,7 @@ cmd_clean() {
 	if git -C "$REPO_ROOT" diff --cached --quiet; then
 		printf '消すものが無い\n' >&2
 	else
-		push_change "host: ${account:-全アカウント} の公開済み動画を削除"
+		push_change "host: ${account:+$account の}${name:-公開済み動画}を削除"
 	fi
 }
 
