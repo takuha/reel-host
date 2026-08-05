@@ -9,17 +9,22 @@ DRY_RUN=0
 [ "${1:-}" = "--dry-run" ] && DRY_RUN=1
 
 cd "$(dirname "$0")"
+git rev-parse --git-dir >/dev/null
 
 cutoff=$(( $(date +%s) - RETENTION_DAYS * 86400 ))
 targets=()
 
+# プロセス置換だと git の失敗を拾えず「対象なし」に見えてしまうので、先に受け取る
+videos=$(git ls-files -- '*.mp4' '*.mov' '*.m4v' '*.webm')
+
 while IFS= read -r file; do
+  [ -n "$file" ] || continue
   committed=$(git log -1 --format=%ct -- "$file")
   # 履歴が引けないものは判定できないので触らない
   [ -n "$committed" ] || continue
   [ "$committed" -lt "$cutoff" ] || continue
   targets+=("$file")
-done < <(git ls-files -- '*.mp4' '*.mov' '*.m4v' '*.webm')
+done <<< "$videos"
 
 if [ ${#targets[@]} -eq 0 ]; then
   echo "削除対象なし (保持期間: ${RETENTION_DAYS}日)"
