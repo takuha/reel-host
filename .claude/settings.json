@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true,
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.session_id // \"unknown\"' | { read -r s; m=\"${TMPDIR:-/tmp}/claude-notify-$s.done\"; if [ -f \"$m\" ]; then rm -f \"$m\"; exit 0; fi; touch \"$m\"; echo \"作業が完了しました。PushNotification ツールで完了内容を1行(200文字以内)でユーザーに通知してから、ターンを終了してください。\" >&2; exit 2; }",
+            "timeout": 10,
+            "statusMessage": "完了通知を確認中",
+            "rewakeSummary": "完了通知"
+          }
+        ]
+      }
+    ]
+  }
+}
