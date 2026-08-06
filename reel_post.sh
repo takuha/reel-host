@@ -34,6 +34,7 @@ usage() {
 使い方:
   reel_post.sh accounts                       .env に設定済みのアカウントを出す
   reel_post.sh check <account>                トークンがそのアカウントに通るか確かめる
+  reel_post.sh refresh <account>              トークンを長期（60日）に延長して .env を更新
   reel_post.sh post <account> <url> [caption] 公開済みURLの動画を投稿する
   reel_post.sh publish <account> <file> [caption]
                                               ホスティングから投稿まで一気にやる
@@ -142,6 +143,69 @@ cmd_accounts() {
 		die "$ENV_FILE にトークンが1つも入っていない"
 	fi
 	printf '%s\n' "$found"
+}
+
+# .env の1行だけ差し替える。トークンには記号が入りうるので sed は使わない。
+update_env_var() {
+	local var="$1" value="$2" tmp line found=0
+	tmp="$(mktemp)"
+	while IFS= read -r line || [ -n "$line" ]; do
+		case "$line" in
+		"$var="*)
+			printf '%s=%s\n' "$var" "$value"
+			found=1
+			;;
+		*) printf '%s\n' "$line" ;;
+		esac
+	done <"$ENV_FILE" >"$tmp"
+	if [ "$found" -eq 0 ]; then
+		printf '%s=%s\n' "$var" "$value" >>"$tmp"
+	fi
+	cp "$ENV_FILE" "$ENV_FILE.bak"
+	mv "$tmp" "$ENV_FILE"
+	chmod 600 "$ENV_FILE" "$ENV_FILE.bak"
+}
+
+# 短期トークンは1時間で切れる。長期に交換しておかないと、翌日には
+# また「接続できない」状態に戻る。
+cmd_refresh() {
+	local account="${1:-}"
+	[ -n "$account" ] || die 'アカウント名が指定されていない'
+	require_tools
+	load_env
+
+	local token var body new_token expires
+	token="$(account_value "$account" ACCESS_TOKEN)"
+	var="$(account_prefix "$account")_ACCESS_TOKEN"
+
+	if [ "$GRAPH_HOST" = "graph.instagram.com" ]; then
+		# Instagram ログイン方式。長期トークンを自分で延長できる。
+		body="$(curl -sS --max-time 60 -G "https://graph.instagram.com/refresh_access_token" \
+			--data-urlencode "grant_type=ig_refresh_token" \
+			--data-urlencode "access_token=$token")"
+	else
+		# Facebook ログイン方式。アプリIDとシークレットで長期トークンに交換する。
+		if [ -z "${META_APP_ID-}" ] || [ -z "${META_APP_SECRET-}" ]; then
+			die 'META_APP_ID と META_APP_SECRET を .env に入れること（アプリの設定→ベーシックにある）'
+		fi
+		body="$(graph_get oauth/access_token \
+			--data-urlencode "grant_type=fb_exchange_token" \
+			--data-urlencode "client_id=$META_APP_ID" \
+			--data-urlencode "client_secret=$META_APP_SECRET" \
+			--data-urlencode "fb_exchange_token=$token")"
+	fi
+
+	fail_on_error "$body" 'トークンの延長'
+	new_token="$(json_get "$body" access_token)"
+	[ -n "$new_token" ] || die "トークンが返ってこない: $body"
+
+	update_env_var "$var" "$new_token"
+
+	expires="$(json_get "$body" expires_in)"
+	case "$expires" in
+	'' | *[!0-9]*) printf '%s のトークンを延長した（%s を更新、元は %s.bak）\n' "$account" "$ENV_FILE" "$ENV_FILE" ;;
+	*) printf '%s のトークンを延長した。あと %d 日（%s を更新、元は %s.bak）\n' "$account" "$((expires / 86400))" "$ENV_FILE" "$ENV_FILE" ;;
+	esac
 }
 
 cmd_check() {
@@ -268,6 +332,7 @@ main() {
 	case "$command" in
 	accounts) cmd_accounts "$@" ;;
 	check) cmd_check "$@" ;;
+	refresh) cmd_refresh "$@" ;;
 	post) cmd_post "$@" ;;
 	publish) cmd_publish "$@" ;;
 	'' | -h | --help | help) usage ;;
