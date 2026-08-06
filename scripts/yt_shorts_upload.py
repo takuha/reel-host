@@ -74,27 +74,55 @@ def authenticate(client_secret: Path, token: Path):
 
 # ---------------------------------------------------------------- 入力の整形
 
+# 年ありの書き方
+DATED_FORMATS = (
+    "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S",
+    "%Y/%m/%d %H:%M", "%Y/%m/%d %H:%M:%S",
+    "%Y年%m月%d日 %H:%M",
+)
+# 年なしの書き方（シートに「8/4」とだけ書いてある場合）
+YEARLESS_FORMATS = ("%m/%d %H:%M", "%m-%d %H:%M", "%m月%d日 %H:%M")
+
+
 def to_rfc3339(value: str, tz_name: str) -> str:
-    """'2026-08-15 21:30' や ISO 形式を、UTC の RFC3339 に直す。"""
-    value = value.strip()
+    """'2026-08-15 21:30' や '8/15 21:30' を、UTC の RFC3339 に直す。"""
+    value = " ".join(value.split())  # 全角スペースや連続スペースをならす
+    tz = ZoneInfo(tz_name)
+    now = datetime.now(tz)
     parsed = None
-    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M"):
+    yearless = False
+
+    for fmt in DATED_FORMATS:
         try:
             parsed = datetime.strptime(value, fmt)
             break
         except ValueError:
             continue
+
+    if parsed is None:
+        for fmt in YEARLESS_FORMATS:
+            try:
+                parsed = datetime.strptime(value, fmt).replace(year=now.year)
+                yearless = True
+                break
+            except ValueError:
+                continue
+
     if parsed is None:
         try:
             parsed = datetime.fromisoformat(value)
         except ValueError:
             sys.exit(
                 f"予約日時を読めませんでした: {value!r}\n"
-                "'2026-08-15 21:30' の形か、ISO形式で渡してください。"
+                "'2026-08-15 21:30' か '8/15 21:30' の形で書いてください。"
             )
 
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=ZoneInfo(tz_name))
+        parsed = parsed.replace(tzinfo=tz)
+
+    # 年が書いていなくて、その日付が過ぎているなら来年ぶんとみなす
+    if yearless and parsed <= now:
+        parsed = parsed.replace(year=now.year + 1)
 
     if parsed <= datetime.now(timezone.utc):
         sys.exit(f"予約日時が過去です: {value}（{tz_name} で解釈しました）")
@@ -200,19 +228,107 @@ def set_thumbnail(youtube, video_id: str, thumb: Path) -> None:
 
 CSV_COLUMNS = ("file", "title", "description", "publish_at", "tags", "thumbnail")
 
+# 見出しは日本語でも英語でも拾う。既存のシートをそのまま渡せるように。
+COLUMN_ALIASES: dict[str, tuple[str, ...]] = {
+    "file": ("file", "video", "videopath", "path", "mp4", "movie",
+             "動画", "動画パス", "動画ファイル", "ファイル", "ファイルパス", "パス", "素材"),
+    "title": ("title", "タイトル", "題名", "見出し"),
+    "description": ("description", "desc", "caption", "body",
+                    "キャプション", "本文", "説明", "概要", "概要欄", "説明文"),
+    "publish_at": ("publishat", "publish", "publishtime", "schedule", "scheduledat",
+                   "予約", "予約日時", "投稿日時", "公開日時", "日時", "配信日時"),
+    "date": ("date", "日付", "投稿日", "予約日", "公開日"),
+    "time": ("time", "時刻", "時間", "投稿時刻", "予約時刻", "投稿時間"),
+    "tags": ("tags", "tag", "タグ", "ハッシュタグ"),
+    "thumbnail": ("thumbnail", "thumb", "サムネ", "サムネイル", "サムネパス", "サムネイルパス"),
+}
 
-def load_csv(path: Path) -> list[dict]:
+
+def normalize_header(name: str) -> str:
+    """見出しのゆれを吸収する。全角スペース・記号・大文字小文字を無視。"""
+    out = (name or "").strip().lower()
+    for junk in (" ", "　", "_", "-", "・", "/", "＿", "（", "）", "(", ")"):
+        out = out.replace(junk, "")
+    return out
+
+
+def detect_columns(headers: list[str], overrides: dict[str, str]) -> dict[str, str]:
+    """見出しを見て、どの列が何かを決める。--map があればそちらを優先。"""
+    normalized = {normalize_header(h): h for h in headers}
+    mapping: dict[str, str] = {}
+
+    for canonical, aliases in COLUMN_ALIASES.items():
+        if canonical in overrides:
+            continue
+        for alias in aliases:
+            hit = normalized.get(normalize_header(alias))
+            if hit is not None:
+                mapping[canonical] = hit
+                break
+
+    for canonical, header in overrides.items():
+        if canonical not in COLUMN_ALIASES:
+            sys.exit(f"--map の左辺が不明です: {canonical}\n使えるのは: {', '.join(COLUMN_ALIASES)}")
+        actual = normalized.get(normalize_header(header))
+        if actual is None:
+            sys.exit(f"--map で指定した列が CSV にありません: {header}\n見出し: {', '.join(headers)}")
+        mapping[canonical] = actual
+
+    return mapping
+
+
+def parse_map_option(raw: str) -> dict[str, str]:
+    overrides: dict[str, str] = {}
+    for chunk in (raw or "").split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if "=" not in chunk:
+            sys.exit(f"--map の書き方が違います: {chunk!r}\n例: --map file=動画パス,publish_at=投稿日時")
+        key, value = chunk.split("=", 1)
+        overrides[key.strip()] = value.strip()
+    return overrides
+
+
+def load_csv(path: Path, overrides: dict[str, str], where: str) -> tuple[list[dict], dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as fh:
         reader = csv.DictReader(fh)
         if reader.fieldnames is None:
             sys.exit(f"{path} に見出し行がありません。")
-        missing = {"file"} - set(reader.fieldnames)
-        if missing:
-            sys.exit(
-                f"{path} に 'file' 列がありません。使える列: {', '.join(CSV_COLUMNS)}\n"
-                f"いまの見出し: {', '.join(reader.fieldnames)}"
-            )
-        return [row for row in reader if (row.get("file") or "").strip()]
+        headers = [h for h in reader.fieldnames if h]
+        rows = list(reader)
+
+    mapping = detect_columns(headers, overrides)
+
+    if "file" not in mapping:
+        sys.exit(
+            f"{path} で動画のパスが入った列を見つけられませんでした。\n"
+            f"見出し: {', '.join(headers)}\n"
+            "この列だと分かっていれば、こう指定してください:\n"
+            "  --map file=<列名>"
+        )
+
+    if where:
+        if "=" not in where:
+            sys.exit("--where の書き方が違います。例: --where アカウント=takuha_nanbei")
+        col, needle = (part.strip() for part in where.split("=", 1))
+        actual = {normalize_header(h): h for h in headers}.get(normalize_header(col))
+        if actual is None:
+            sys.exit(f"--where で指定した列が CSV にありません: {col}\n見出し: {', '.join(headers)}")
+        before = len(rows)
+        rows = [r for r in rows if needle.lower() in (r.get(actual) or "").lower()]
+        print(f"  絞り込み: {actual} に「{needle}」を含む行 → {len(rows)}/{before} 行")
+
+    file_col = mapping["file"]
+    rows = [r for r in rows if (r.get(file_col) or "").strip()]
+    return rows, mapping
+
+
+def row_value(row: dict, mapping: dict[str, str], key: str) -> str:
+    header = mapping.get(key)
+    if not header:
+        return ""
+    return (row.get(header) or "").strip()
 
 
 # ---------------------------------------------------------------- 本体
@@ -223,7 +339,11 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("video", nargs="?", type=Path, help="上げる mp4")
-    parser.add_argument("--csv", type=Path, help=f"まとめて上げる。列: {', '.join(CSV_COLUMNS)}")
+    parser.add_argument("--csv", type=Path, help="まとめて上げる。見出しは日本語でも自動で見分ける")
+    parser.add_argument("--map", default="", metavar="列の対応",
+                        help="見出しを手で指定する。例: --map file=動画パス,publish_at=投稿日時")
+    parser.add_argument("--where", default="", metavar="列=値",
+                        help="行を絞り込む。例: --where アカウント=takuha_nanbei")
     parser.add_argument("--title", default="", help="省略するとキャプション1行目を使う")
     parser.add_argument("--description", default="", help="省略すると隣の .txt を読む")
     parser.add_argument("--tags", default="", help="カンマ区切り")
@@ -246,17 +366,36 @@ def main() -> None:
     jobs: list[dict] = []
     if args.csv:
         base = args.csv.parent
-        for row in load_csv(args.csv):
-            path = Path(row["file"].strip()).expanduser()
+        rows, mapping = load_csv(args.csv, parse_map_option(args.map), args.where)
+
+        print("  列の対応:")
+        for canonical in ("file", "title", "description", "publish_at", "date", "time", "tags", "thumbnail"):
+            found = mapping.get(canonical)
+            print(f"    {canonical:<12} {found if found else '—'}")
+        print()
+
+        for row in rows:
+            path = Path(row_value(row, mapping, "file")).expanduser()
             if not path.is_absolute():
                 path = (base / path).resolve()
+
+            # 予約日時の列が無ければ、日付＋時刻から組み立てる
+            publish_at = row_value(row, mapping, "publish_at")
+            if not publish_at:
+                day = row_value(row, mapping, "date")
+                clock = row_value(row, mapping, "time")
+                if day and clock:
+                    publish_at = f"{day} {clock}"
+                elif day:
+                    publish_at = day
+
             jobs.append({
                 "video": path,
-                "title": (row.get("title") or "").strip(),
-                "description": (row.get("description") or "").strip(),
-                "tags": (row.get("tags") or "").strip(),
-                "publish_at": (row.get("publish_at") or "").strip(),
-                "thumbnail": (row.get("thumbnail") or "").strip(),
+                "title": row_value(row, mapping, "title"),
+                "description": row_value(row, mapping, "description"),
+                "tags": row_value(row, mapping, "tags"),
+                "publish_at": publish_at,
+                "thumbnail": row_value(row, mapping, "thumbnail"),
             })
     else:
         jobs.append({
