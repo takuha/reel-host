@@ -70,6 +70,8 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 ./reel_post.sh check aoyagi                               # 接続確認
 ./reel_post.sh refresh aoyagi                             # トークンを60日に延長
 ./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "本文" # 公開→投稿→後片付け
+./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 \
+  -f captions/doge-mining-payments.txt                  # 本文をファイルから渡す
 ```
 
 `publish` は「ホスティング → 投稿 → 投稿できた分だけ削除」までやる。まだ投稿して
@@ -86,6 +88,29 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 
 `add` は GitHub Pages が実際に配信を始めるまで待ってから URL を出す。プッシュ直後は
 まだ 404 で、待たずに Graph API へ渡すと動画取得に失敗するため。
+
+## 本文
+
+改行の多い長文をシェルの引数に載せると、引用符やバッククォートで壊れる。本文は
+`captions/` にファイルで置いて `--caption-file`（`-f`）で渡す。
+
+```sh
+./reel_post.sh publish takuha ~/Movies/reel001.mp4 -f captions/doge-mining-payments.txt
+```
+
+- ファイル中の改行はそのまま Instagram の改行になる。末尾の改行だけ落ちる。
+- 引数での指定と `--caption-file` は併用できない。両方あるとエラーで止まる。
+- Instagram の本文は **2200文字** が上限。超えたぶんが切られるのではなく投稿ごと
+  弾かれるので、投稿前に文字数を見て落とす。日本語はバイト数だと3倍に出るため、
+  数えているのは文字数。
+- `publish` は本文を確かめてからホスティングする。上げてから落ちると、投稿して
+  いない動画がリポジトリに残ってしまうため。
+
+置いてある本文:
+
+| ファイル | 内容 |
+| --- | --- |
+| `captions/doge-mining-payments.txt` | DOGE マイニングと決済（W杯決勝の日） |
 
 ## 消し忘れの保険
 
@@ -150,6 +175,8 @@ videos/aoyagi/reel001.mp4
 | `REEL_GRAPH_VERSION` | `v21.0` | Graph API のバージョン |
 | `REEL_POLL_TRIES` / `_INTERVAL` | `60` / `5` | 動画変換を待つ回数・間隔（秒） |
 | `REEL_ENV_FILE` | `./.env` | 設定ファイルの場所 |
+| `REEL_CAPTION_FILE` | （なし） | `--caption-file` の既定値 |
+| `REEL_CAPTION_LIMIT` | `2200` | 本文の上限文字数。Meta 側が変えたら上げる |
 
 `REEL_GRAPH_VERSION` はバージョン切れを言われたら上げる。既定値が現時点の最新とは
 限らないので、エラーが出たら Meta の changelog で確認すること。
