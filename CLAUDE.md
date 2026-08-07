@@ -16,24 +16,21 @@ Instagram リールを投稿するための一式。Meta Graph API が動画を�
 アカウントは `.env` の接頭辞で決まる（`AOYAGI_` → `aoyagi`）。増やすときは2行足すだけで、
 スクリプトは触らない。
 
-## 未解決の課題
+## cleanup.sh の自動実行 — Routine で回っている
 
-### cleanup.sh の自動実行が確認できていない
+README の「毎朝9時に自動実行される」は正しい。ただし**仕組みがリポジトリの外にある**ため、
+`.github/` を見ても `crontab -l` を打っても見つからない。実体は Claude Code の Routine。
 
-README には「毎朝9時に自動実行される」とあるが、**それを行う仕組みがリポジトリ内に無い**。
-`.github/` は存在せず、Actions のワークフローは GitHub が自動生成する
-`pages-build-deployment` の1つだけ。
+| 項目 | 値 |
+| --- | --- |
+| 名前 | 自動掃除 |
+| cron | `0 0 * * *`（UTC）= 毎朝9時 JST |
+| 内容 | main で `./cleanup.sh` を実行して push |
 
-ローカルの cron / launchd で回しているなら問題ない。確認する方法:
+**`.github/workflows/cleanup.yml` を追加してはいけない。** 二重に走る。
 
-```sh
-crontab -l | grep -i cleanup
-launchctl list | grep -i cleanup
-```
-
-**何も出ない場合は保険が掛かっていない**（消し忘れた動画が公開URLに残り続ける）ので、
-`.github/workflows/cleanup.yml` を追加する。ローカルで回っているなら二重に動くため
-**追加してはいけない**。この確認が取れるまで、勝手にワークフローを足さないこと。
+自動実行の有無を調べるときは、`crontab` と Actions だけでなく **Routine の一覧も見ること**
+（`list_triggers`）。ここを見落とすと「保険が掛かっていない」と誤診する。
 
 ## 判断済みで、蒸し返さなくていいこと
 
