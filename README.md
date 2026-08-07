@@ -106,11 +106,13 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 - `publish` は本文を確かめてからホスティングする。上げてから落ちると、投稿して
   いない動画がリポジトリに残ってしまうため。
 
-置いてある本文:
+数字や固有名詞を出す本文には、同じ名前で `.sources.md` を並べて出典を残す。使い回すとき
+に盛り直して事故らないための記録なので、**本文を直したら出典も直す**。
 
 | ファイル | 内容 |
 | --- | --- |
 | `captions/doge-mining-payments.txt` | DOGE マイニングと決済（W杯決勝の話から入る） |
+| `captions/doge-mining-payments.sources.md` | 上の出典と、書き換えるときの注意 |
 
 ## 消し忘れの保険
 
