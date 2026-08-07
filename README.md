@@ -137,6 +137,16 @@ videos/aoyagi/reel001.mp4
   → https://takuha.github.io/reel-host/videos/aoyagi/reel001.mp4
 ```
 
+## レシピ
+
+投稿するネタは `recipes/<account>.md` に貯める。スクリプトは読まない、ただのメモ。
+
+```
+recipes/takuha.md
+```
+
+参考にした元動画の URL は、クレジットのために必ず残す。
+
 ## 設定
 
 環境変数で上書きできる。
