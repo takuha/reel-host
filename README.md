@@ -110,7 +110,7 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 
 | ファイル | 内容 |
 | --- | --- |
-| `captions/doge-mining-payments.txt` | DOGE マイニングと決済（W杯決勝の日） |
+| `captions/doge-mining-payments.txt` | DOGE マイニングと決済（W杯決勝の話から入る） |
 
 ## 消し忘れの保険
 
