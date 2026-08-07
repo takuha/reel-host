@@ -82,9 +82,13 @@ fetch_url() {
 
 	FETCH_DIR="$(mktemp -d)"
 
-	# Meta が受け付けるのは MP4/MOV なので mp4 を優先して取る。
+	# コーデックは H.264 を最優先する。TikTok は既定だと HEVC(h265) の方が
+	# 解像度が高く、そのまま取ると h265 を掴む。Meta のリールは H.264/MP4 が
+	# 対象で、h265 を渡すと変換段階(status_code=ERROR)で落ちる。
+	# 解像度より通ることを優先する。
 	# 進捗は stderr へ。stdout は公開URLの出力専用。
-	yt-dlp --no-playlist -S 'ext:mp4:m4a' -o "$FETCH_DIR/%(id)s.%(ext)s" -- "$url" >&2 ||
+	yt-dlp --no-playlist -S 'vcodec:h264,res,ext:mp4:m4a' \
+		-o "$FETCH_DIR/%(id)s.%(ext)s" -- "$url" >&2 ||
 		die "動画を取得できない: $url"
 
 	FETCHED_FILE="$(find "$FETCH_DIR" -type f -print | head -n 1)"
