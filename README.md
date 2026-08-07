@@ -4,7 +4,7 @@
 
 | スクリプト | 役割 |
 | --- | --- |
-| `reel_host.sh` | 動画を GitHub Pages に載せて公開URLを出す／投稿後に消す |
+| `reel_host.sh` | 動画（ローカルのファイルか動画URL）を GitHub Pages に載せて公開URLを出す／投稿後に消す |
 | `reel_post.sh` | その公開URLを Meta Graph API に渡してリールとして投稿する |
 | `cleanup.sh` | 消し忘れた動画を時間経過で拾う保険（毎朝9時に自動実行） |
 
@@ -84,6 +84,33 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 ./reel_host.sh clean aoyagi                      # そのアカウント分を全部消す
 ```
 
+## 動画URLから投稿する
+
+手元にファイルが無くても、動画ページのURLをそのまま渡せる。TikTok など
+`yt-dlp` が対応しているサイトなら、取得から投稿まで一度で通る。
+
+```sh
+./reel_post.sh publish aoyagi "https://vt.tiktok.com/XXXXXXXX/" "本文"
+./reel_host.sh add aoyagi "https://vt.tiktok.com/XXXXXXXX/"   # 公開だけ
+```
+
+`http://` か `https://` で始まる引数はURLとして扱い、それ以外はローカルの
+ファイルとして扱う。動画は一時ディレクトリに落としてから公開し、終了時に消す
+ので、作業ディレクトリは汚れない。Meta が受け付けるのは MP4/MOV なので mp4 を
+優先して取得する。
+
+`yt-dlp` が要る。
+
+```sh
+brew install yt-dlp    # または pip install -U yt-dlp
+```
+
+`publish` の第2引数はダウンロード元のURL、`post` の第2引数は**すでに公開されて
+いる動画の直リンク**で、意味が違うので注意。`post` にTikTokのページURLを渡しても
+Meta 側が動画を取得できない。
+
+投稿できる権利のある動画かどうかは自分で確認すること。スクリプトは何も判断しない。
+
 `add` は GitHub Pages が実際に配信を始めるまで待ってから URL を出す。プッシュ直後は
 まだ 404 で、待たずに Graph API へ渡すと動画取得に失敗するため。
 
@@ -154,4 +181,5 @@ videos/aoyagi/reel001.mp4
 `REEL_GRAPH_VERSION` はバージョン切れを言われたら上げる。既定値が現時点の最新とは
 限らないので、エラーが出たら Meta の changelog で確認すること。
 
-必要なコマンドは `curl` と、`jq` または `python3` のどちらか。
+必要なコマンドは `curl` と、`jq` または `python3` のどちらか。動画URLを渡す場合は
+`yt-dlp` も要る（ローカルのファイルだけを扱うなら不要）。

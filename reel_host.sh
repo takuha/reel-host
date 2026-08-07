@@ -28,13 +28,17 @@ die() {
 usage() {
 	cat <<'EOS'
 使い方:
-  reel_host.sh add <account> <video-file>  動画を公開して URL を出す
+  reel_host.sh add <account> <video|url>   動画を公開して URL を出す
   reel_host.sh url <account> <name>        公開 URL を組み立てて出す
   reel_host.sh list [account]              ホスティング中の動画を出す
   reel_host.sh clean [account] [name]      投稿済み動画を消す（省略時は全アカウント）
 
 アカウントごとに videos/<account>/ に分けて置く。例:
   reel_host.sh add aoyagi ~/Movies/reel001.mp4
+  reel_host.sh add aoyagi https://vt.tiktok.com/XXXXXXXX/
+
+URL を渡した場合は yt-dlp で落としてから公開する。落としたファイルは
+一時ディレクトリに置き、終了時に消す。
 EOS
 }
 
@@ -48,6 +52,43 @@ validate_account() {
 
 safe_name() {
 	printf '%s' "$1" | tr -c 'A-Za-z0-9._-' '_'
+}
+
+# 動画URLを渡された場合に使う。TikTok などは配信ページが JS 前提で、
+# 動画の直リンクも短時間で失効するため、取得は yt-dlp に任せる。
+FETCH_DIR=""
+FETCHED_FILE=""
+
+cleanup_fetch() {
+	if [ -n "$FETCH_DIR" ]; then
+		rm -rf "$FETCH_DIR"
+	fi
+}
+trap cleanup_fetch EXIT
+
+is_url() {
+	case "$1" in
+	http://* | https://*) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
+# 取得したパスは FETCHED_FILE に入れる。コマンド置換で受け取ると
+# サブシェルの終了時に trap が走り、使う前に消えてしまうため。
+fetch_url() {
+	local url="$1"
+	command -v yt-dlp >/dev/null ||
+		die 'URL を渡すには yt-dlp が要る（brew install yt-dlp）。ローカルのファイルを渡す形でも投稿できる。'
+
+	FETCH_DIR="$(mktemp -d)"
+
+	# Meta が受け付けるのは MP4/MOV なので mp4 を優先して取る。
+	# 進捗は stderr へ。stdout は公開URLの出力専用。
+	yt-dlp --no-playlist -S 'ext:mp4:m4a' -o "$FETCH_DIR/%(id)s.%(ext)s" -- "$url" >&2 ||
+		die "動画を取得できない: $url"
+
+	FETCHED_FILE="$(find "$FETCH_DIR" -type f -print | head -n 1)"
+	[ -n "$FETCHED_FILE" ] || die "取得できたファイルが見つからない: $url"
 }
 
 require_branch() {
@@ -77,10 +118,16 @@ wait_until_live() {
 cmd_add() {
 	local account="${1:-}" src="${2:-}"
 	validate_account "$account"
-	[ -n "$src" ] || die '動画ファイルが指定されていない'
-	[ -f "$src" ] || die "ファイルが見つからない: $src"
+	[ -n "$src" ] || die '動画ファイルかURLが指定されていない'
+	is_url "$src" || [ -f "$src" ] || die "ファイルが見つからない: $src"
 
+	# ダウンロードは時間がかかるので、ブランチ違いはその前に弾く。
 	require_branch
+
+	if is_url "$src"; then
+		fetch_url "$src"
+		src="$FETCHED_FILE"
+	fi
 
 	local name dest
 	name="$(safe_name "$(basename "$src")")"
