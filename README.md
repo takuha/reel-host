@@ -1,9 +1,10 @@
 # reel-host
 
-リールを投稿するための一式。役割が3つに分かれている。
+リールを投稿するための一式。役割が分かれている。
 
 | スクリプト | 役割 |
 | --- | --- |
+| `reel_fetch.sh` | TikTok などの共有URLから動画の元ファイルを取ってくる |
 | `reel_host.sh` | 動画を GitHub Pages に載せて公開URLを出す／投稿後に消す |
 | `reel_post.sh` | その公開URLを Meta Graph API に渡してリールとして投稿する |
 | `cleanup.sh` | 消し忘れた動画を時間経過で拾う保険（毎朝9時に自動実行） |
@@ -87,6 +88,62 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 `add` は GitHub Pages が実際に配信を始めるまで待ってから URL を出す。プッシュ直後は
 まだ 404 で、待たずに Graph API へ渡すと動画取得に失敗するため。
 
+## URL から投稿する
+
+`publish` と `add` は、動画ファイルの代わりに**動画のURLをそのまま渡せる**。手元に
+ダウンロードしてからパスを打つ、という手間が要らない。
+
+```sh
+./reel_post.sh publish aoyagi https://vt.tiktok.com/XXXXXXXX/ "本文"
+```
+
+TikTok などの共有URLは「ページのURL」であって動画そのものではないので、ページを
+解析して実体を取り出す必要がある。そこは `yt-dlp` に任せている。**URL を渡す使い方を
+するなら `yt-dlp` を入れておくこと。**
+
+```sh
+brew install yt-dlp     # または pipx install yt-dlp
+```
+
+URL が直接 `.mp4` を指している場合は `curl` だけで取れるので `yt-dlp` は要らない。
+
+取ってくるだけなら単体でも使える。出力先を省略すると一時ディレクトリに置く。
+
+```sh
+./reel_fetch.sh https://vt.tiktok.com/XXXXXXXX/            # パスを出す
+./reel_fetch.sh https://vt.tiktok.com/XXXXXXXX/ ~/Movies   # 置き場所を指定
+```
+
+### ログインが要る動画
+
+非公開・年齢制限などでログインが必要な動画は、Cookie を渡さないと取れない。
+**ブラウザでログインしているだけでは効かない**（スクリプトはそのブラウザとは別物
+なので、ログイン状態を引き継がない）。
+
+```sh
+REEL_FETCH_COOKIES_FROM_BROWSER=chrome ./reel_post.sh publish aoyagi "<url>" "本文"
+```
+
+エクスポート済みの Cookie ファイル（Netscape 形式）があるならこちら。
+
+```sh
+REEL_FETCH_COOKIES=~/cookies.txt ./reel_post.sh publish aoyagi "<url>" "本文"
+```
+
+なお、他人の動画をそのまま投稿してよいかは別の話。権利は自分で確認すること。
+
+### 投稿できるURLとできないURL
+
+`post` に渡す `<url>` と、`publish` / `add` に渡す `<url>` は別物なので注意。
+
+| コマンド | 渡すURL |
+| --- | --- |
+| `publish` / `add` | 動画の**取得元**。TikTok の共有URLなど。手元に落としてから載せ直す |
+| `post` | **自分で公開したURL**。`add` が出したもの。Meta がここから動画を取りに来る |
+
+`post` に TikTok のURLを直接渡しても通らない。Meta は渡されたURLから動画ファイル
+そのものを取得しようとするので、ページのURLでは失敗する。
+
 ## 消し忘れの保険
 
 `clean` を打ち忘れた分は `cleanup.sh` が拾う。コミットから3日以上経った動画を削除して
@@ -150,8 +207,11 @@ videos/aoyagi/reel001.mp4
 | `REEL_GRAPH_VERSION` | `v21.0` | Graph API のバージョン |
 | `REEL_POLL_TRIES` / `_INTERVAL` | `60` / `5` | 動画変換を待つ回数・間隔（秒） |
 | `REEL_ENV_FILE` | `./.env` | 設定ファイルの場所 |
+| `REEL_FETCH_COOKIES` | なし | URL取得に使う Cookie ファイル（Netscape 形式） |
+| `REEL_FETCH_COOKIES_FROM_BROWSER` | なし | Cookie をブラウザから直接読む（`chrome` など） |
 
 `REEL_GRAPH_VERSION` はバージョン切れを言われたら上げる。既定値が現時点の最新とは
 限らないので、エラーが出たら Meta の changelog で確認すること。
 
-必要なコマンドは `curl` と、`jq` または `python3` のどちらか。
+必要なコマンドは `curl` と、`jq` または `python3` のどちらか。URL から投稿するなら
+これに `yt-dlp` が加わる。
