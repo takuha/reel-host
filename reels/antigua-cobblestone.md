@@ -141,3 +141,16 @@ A/B/C はどれも同じ本編につながるので、伸びなければフッ�
 `publish` はホスティング → 投稿 → 投稿できた分だけ削除まで通す。
 トークンは60日で切れるので、`check` が `code 190` を返したら
 `./reel_post.sh refresh <アカウント>` を先に打つこと。
+
+## 実写なし版の動画
+
+`reels/build_antigua_cobblestone.py` で30秒・1080x1920のリールを1本書き出せる。
+背景の石畳は手続き的に描いた丸石で、歩いているようにゆっくり流れる。
+
+```sh
+pip install pillow numpy imageio-ffmpeg
+python3 reels/build_antigua_cobblestone.py -o out/antigua-cobblestone.mp4
+```
+
+テロップの文言とタイミングは先頭の `CUES` にまとまっている。実写を撮ったあとは
+背景の生成部分だけ差し替えれば、テロップはそのまま流用できる。
