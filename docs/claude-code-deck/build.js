@@ -7,84 +7,92 @@ pres.title = "Claude Code 完全入門 — 要点まとめ";
 
 const W = 13.3, H = 7.5, M = 0.75;
 
-// ---- palette -------------------------------------------------------------
-const INK = "12151C";
-const INK2 = "1D2230";
-const SLATE = "39435A";
-const MUTED = "6E7891";
-const MUTED_D = "9AA3B8";
-const ACCENT = "E2603C";
-const TEAL = "1C7293";
+// ---- palette (dark / tech) ----------------------------------------------
+const BG = "0A0D14";      // slide background
+const PANEL = "121826";   // card
+const PANEL2 = "182034";  // raised card / terminal
+const LINE = "232C42";    // hairline border
+const CYAN = "3FE0C8";    // primary accent
+const VIOLET = "8E7BFF";  // secondary accent
+const CYAN_BG = "0E2A2A"; // cyan-tinted panel
+const CYAN_LN = "2A6B62";
+const VIO_BG = "1A1733";  // violet-tinted panel
+const VIO_LN = "3C3470";
+const TXT = "C4CDE0";     // body text
+const DIM = "8794AE";     // muted text
 const WHITE = "FFFFFF";
-const CARD = "F3F4F7";
-const LINE = "E2E5EB";
 
 const JP = "Yu Gothic";
 
 // ---- helpers -------------------------------------------------------------
-const shadow = () => ({ type: "outer", color: "1A1F2C", blur: 14, offset: 3, angle: 90, opacity: 0.1 });
-
-function lightSlide() {
+function slide() {
   const s = pres.addSlide();
-  s.background = { color: WHITE };
-  return s;
-}
-function darkSlide() {
-  const s = pres.addSlide();
-  s.background = { color: INK };
+  s.background = { color: BG };
   return s;
 }
 
-// numbered chapter badge + section label (the repeated motif)
+// dot grid texture. blur is unavailable, so a soft glow would render as
+// visible concentric ellipses — a grid of small dots reads cleaner on dark.
+function dotGrid(s, x, y, cols, rows, opts = {}) {
+  const step = opts.step == null ? 0.46 : opts.step;
+  const d = opts.size == null ? 0.045 : opts.size;
+  const color = opts.color || "27324A";
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      s.addShape(pres.ShapeType.ellipse, {
+        x: x + c * step, y: y + r * step, w: d, h: d,
+        fill: { color }, line: { color, width: 0 },
+      });
+    }
+  }
+}
+
+function panel(s, x, y, w, h, opts = {}) {
+  s.addShape(pres.ShapeType.roundRect, {
+    x, y, w, h, rectRadius: 0.06,
+    fill: { color: opts.fill || PANEL },
+    line: { color: opts.lineColor || LINE, width: 1 },
+  });
+}
+
+// chapter marker: bracketed number + label (repeated motif)
 function badge(s, num, label, opts = {}) {
-  const dark = !!opts.dark;
-  const y = opts.y == null ? 0.6 : opts.y;
-  s.addShape(pres.ShapeType.ellipse, {
-    x: M, y: y, w: 0.5, h: 0.5, fill: { color: ACCENT },
+  const y = opts.y == null ? 0.62 : opts.y;
+  s.addShape(pres.ShapeType.roundRect, {
+    x: M, y: y, w: 0.62, h: 0.44, rectRadius: 0.05,
+    fill: { color: CYAN_BG }, line: { color: CYAN_LN, width: 1 },
   });
   s.addText(num, {
-    x: M, y: y, w: 0.5, h: 0.5, align: "center", valign: "middle", margin: 0,
-    fontFace: JP, fontSize: 15, bold: true, color: WHITE,
+    x: M, y: y, w: 0.62, h: 0.44, align: "center", valign: "middle", margin: 0,
+    fontFace: "Courier New", fontSize: 14, bold: true, color: CYAN,
   });
   s.addText(label, {
-    x: M + 0.68, y: y, w: 8.0, h: 0.5, valign: "middle", margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: dark ? MUTED_D : MUTED, charSpacing: 1.5,
+    x: M + 0.8, y: y, w: 9.0, h: 0.44, valign: "middle", margin: 0,
+    fontFace: JP, fontSize: 13, bold: true, color: DIM, charSpacing: 1.5,
   });
 }
 
 function heading(s, text, opts = {}) {
-  const dark = !!opts.dark;
   s.addText(text, {
     x: M, y: opts.y == null ? 1.28 : opts.y, w: opts.w == null ? W - M * 2 : opts.w, h: 0.95,
     valign: "middle", margin: 0,
     fontFace: JP, fontSize: opts.size == null ? 33 : opts.size, bold: true,
-    color: dark ? WHITE : INK, lineSpacing: opts.size ? opts.size * 1.35 : 44,
+    color: WHITE, lineSpacing: opts.size ? opts.size * 1.35 : 44,
   });
 }
 
-function card(s, x, y, w, h, opts = {}) {
-  s.addShape(pres.ShapeType.roundRect, {
-    x, y, w, h, rectRadius: 0.1,
-    fill: { color: opts.fill || CARD },
-    line: opts.line === false ? { color: opts.fill || CARD, width: 0 } : { color: opts.lineColor || LINE, width: 1 },
-    shadow: opts.shadow ? shadow() : undefined,
-  });
-}
-
-// terminal-style mock block (visual motif for "実行するAI")
 function terminal(s, x, y, w, h, lines, opts = {}) {
   s.addShape(pres.ShapeType.roundRect, {
-    x, y, w, h, rectRadius: 0.08,
-    fill: { color: opts.fill || INK2 }, line: { color: opts.fill || INK2, width: 0 },
-    shadow: shadow(),
+    x, y, w, h, rectRadius: 0.06,
+    fill: { color: PANEL2 }, line: { color: opts.lineColor || CYAN_LN, width: 1 },
   });
-  ["E2603C", "D8B24A", "63A87B"].forEach((c, i) => {
+  ["E2603C", "D8B24A", CYAN].forEach((c, i) => {
     s.addShape(pres.ShapeType.ellipse, { x: x + 0.26 + i * 0.26, y: y + 0.26, w: 0.13, h: 0.13, fill: { color: c } });
   });
   s.addText(
     lines.map((l, i) => ({
       text: l.t,
-      options: { color: l.c || "D7DBE6", bold: !!l.b, breakLine: i !== lines.length - 1 },
+      options: { color: l.c || TXT, bold: !!l.b, breakLine: i !== lines.length - 1 },
     })),
     {
       x: x + 0.26, y: y + 0.66, w: w - 0.52, h: h - 0.9, margin: 0, valign: "top",
@@ -97,10 +105,12 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 1. Title
 // =========================================================================
 {
-  const s = darkSlide();
+  const s = slide();
+  dotGrid(s, 8.5, 5.9, 10, 3);
+
   s.addText("YOUTUBE 要点まとめ", {
     x: M, y: 1.15, w: 7.2, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 2.5,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN, charSpacing: 2.5,
   });
   s.addText("Claude Code\n完全入門", {
     x: M, y: 1.7, w: 7.2, h: 2.3, margin: 0,
@@ -108,26 +118,26 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   });
   s.addText("誰でも使えるツール／実行革命／ChatGPTとの違い／5体のAIエージェント／\n願望の質＝アウトプットの質／Skills活用法／経営者こそ使うべき", {
     x: M, y: 4.15, w: 7.2, h: 1.0, margin: 0,
-    fontFace: JP, fontSize: 14, color: MUTED_D, lineSpacing: 26,
+    fontFace: JP, fontSize: 14, color: TXT, lineSpacing: 26,
   });
   s.addText("takuha ／ 社内共有用", {
     x: M, y: 6.35, w: 7.2, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 12, color: MUTED, charSpacing: 1,
+    fontFace: JP, fontSize: 12, color: DIM, charSpacing: 1,
   });
 
   terminal(s, 8.55, 1.7, 3.95, 3.6, [
-    { t: "$ claude", c: "8C93A8" },
-    { t: "", c: "8C93A8" },
+    { t: "$ claude", c: DIM },
+    { t: "", c: DIM },
     { t: "> 先週の投稿をまとめて", b: true, c: WHITE },
     { t: "  レポートにして", b: true, c: WHITE },
-    { t: "", c: "8C93A8" },
-    { t: "● ファイルを読んでいます", c: "9DC7B4" },
-    { t: "● 集計しています", c: "9DC7B4" },
-    { t: "● report.md を書きました", c: "9DC7B4" },
+    { t: "", c: DIM },
+    { t: "● ファイルを読んでいます", c: CYAN },
+    { t: "● 集計しています", c: CYAN },
+    { t: "● report.md を書きました", c: CYAN },
   ], { size: 13, lh: 26 });
   s.addText("聞くのではなく、終わらせてもらう", {
     x: 8.55, y: 5.45, w: 3.95, h: 0.35, margin: 0, align: "center",
-    fontFace: JP, fontSize: 12, color: MUTED, italic: true,
+    fontFace: JP, fontSize: 12, color: DIM, italic: true,
   });
 
   s.addNotes("元動画は視聴できていないため、タイトルに並ぶ論点とClaude Codeの実際の仕様をもとに構成している。最終ページの注記を参照。");
@@ -137,10 +147,10 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 2. 全体像
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   s.addText("OVERVIEW", {
     x: M, y: 0.62, w: 6, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 2.5,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN, charSpacing: 2.5,
   });
   heading(s, "動画の8つの論点を、6つの要点に整理した", { y: 1.05, size: 31 });
 
@@ -156,19 +166,22 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   items.forEach((it, i) => {
     const x = x0 + (i % 3) * (cw + gx);
     const y = y0 + Math.floor(i / 3) * (ch + gy);
-    card(s, x, y, cw, ch, { fill: CARD });
-    s.addShape(pres.ShapeType.ellipse, { x: x + 0.3, y: y + 0.3, w: 0.44, h: 0.44, fill: { color: ACCENT } });
+    panel(s, x, y, cw, ch);
+    s.addShape(pres.ShapeType.roundRect, {
+      x: x + 0.3, y: y + 0.3, w: 0.58, h: 0.42, rectRadius: 0.05,
+      fill: { color: CYAN_BG }, line: { color: CYAN_LN, width: 1 },
+    });
     s.addText(it[0], {
-      x: x + 0.3, y: y + 0.3, w: 0.44, h: 0.44, align: "center", valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 12, bold: true, color: WHITE,
+      x: x + 0.3, y: y + 0.3, w: 0.58, h: 0.42, align: "center", valign: "middle", margin: 0,
+      fontFace: "Courier New", fontSize: 12, bold: true, color: CYAN,
     });
     s.addText(it[1], {
-      x: x + 0.88, y: y + 0.3, w: cw - 1.18, h: 0.44, valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 16, bold: true, color: INK,
+      x: x + 1.02, y: y + 0.3, w: cw - 1.32, h: 0.42, valign: "middle", margin: 0,
+      fontFace: JP, fontSize: 16, bold: true, color: WHITE,
     });
     s.addText(it[2], {
       x: x + 0.3, y: y + 0.92, w: cw - 0.6, h: 0.75, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 12, color: SLATE, lineSpacing: 20,
+      fontFace: JP, fontSize: 12, color: TXT, lineSpacing: 20,
     });
   });
   s.addNotes("6本立て。01と02が入口、03が実演、04と05が実務、06が経営視点。");
@@ -178,19 +191,19 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 3. 実行革命
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "01", "実行革命");
   heading(s, "「提案するAI」から「実行するAI」へ");
 
   const cw = 5.75, cy = 2.55, chh = 3.2;
-  card(s, M, cy, cw, chh, { fill: CARD });
+  panel(s, M, cy, cw, chh);
   s.addText("これまで", {
     x: M + 0.42, y: cy + 0.35, w: cw - 0.84, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: MUTED, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: DIM, charSpacing: 1.5,
   });
   s.addText("答えを教えてもらう", {
     x: M + 0.42, y: cy + 0.75, w: cw - 0.84, h: 0.45, margin: 0,
-    fontFace: JP, fontSize: 21, bold: true, color: SLATE,
+    fontFace: JP, fontSize: 21, bold: true, color: TXT,
   });
   s.addText([
     { text: "AIに聞く", options: { bullet: true, breakLine: true } },
@@ -198,19 +211,19 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
     { text: "動かない → また聞く、をくり返す", options: { bullet: true, breakLine: true } },
     { text: "手を動かすのは、最後まで自分", options: { bullet: true } },
   ], {
-    x: M + 0.42, y: cy + 1.4, w: cw - 0.84, h: 1.4, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13.5, color: SLATE, paraSpaceAfter: 8,
+    x: M + 0.42, y: cy + 1.4, w: cw - 0.84, h: 1.5, margin: 0, valign: "top",
+    fontFace: JP, fontSize: 13.5, color: DIM, paraSpaceAfter: 8,
   });
 
   const x2 = M + cw + 0.3;
-  card(s, x2, cy, cw, chh, { fill: "FCEFE9", lineColor: "F0C9B8" });
+  panel(s, x2, cy, cw, chh, { fill: CYAN_BG, lineColor: CYAN_LN });
   s.addText("これから", {
     x: x2 + 0.42, y: cy + 0.35, w: cw - 0.84, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN, charSpacing: 1.5,
   });
   s.addText("終わったものを受け取る", {
     x: x2 + 0.42, y: cy + 0.75, w: cw - 0.84, h: 0.45, margin: 0,
-    fontFace: JP, fontSize: 21, bold: true, color: INK,
+    fontFace: JP, fontSize: 21, bold: true, color: WHITE,
   });
   s.addText([
     { text: "日本語で指示を出す", options: { bullet: true, breakLine: true } },
@@ -218,13 +231,13 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
     { text: "コマンドを実行し、動くところまで確認する", options: { bullet: true, breakLine: true } },
     { text: "こちらは何も貼り付けていない", options: { bullet: true } },
   ], {
-    x: x2 + 0.42, y: cy + 1.4, w: cw - 0.84, h: 1.4, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13.5, color: INK2, paraSpaceAfter: 8,
+    x: x2 + 0.42, y: cy + 1.4, w: cw - 0.84, h: 1.5, margin: 0, valign: "top",
+    fontFace: JP, fontSize: 13.5, color: WHITE, paraSpaceAfter: 8,
   });
 
   s.addText("この差が「実行革命」。作業の主語がこちらから向こうへ移る", {
     x: M, y: 6.2, w: W - M * 2, h: 0.5, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 15, bold: true, color: ACCENT,
+    fontFace: JP, fontSize: 15, bold: true, color: CYAN,
   });
   s.addNotes("ポイントは速さではなく、主語が移ること。コピペの往復が丸ごと消える。");
 }
@@ -233,26 +246,24 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 4. ChatGPTとの違い
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "01", "実行革命 ／ ChatGPTとの違い");
   heading(s, "敵ではない。相談する相手と、作業する相手は別");
 
+  const hdr = { fill: { color: VIO_BG }, color: VIOLET, bold: true, align: "center" };
+  const hdr2 = { fill: { color: CYAN_BG }, color: CYAN, bold: true, align: "center" };
+  const lcell = { fill: { color: PANEL }, bold: true, color: WHITE };
+  const mcell = { fill: { color: PANEL }, color: DIM };
+  const rcell = { fill: { color: PANEL2 }, color: WHITE, bold: true };
+
   const rows = [
-    [{ text: "", options: { fill: { color: WHITE } } },
-     { text: "チャット型のAI", options: { fill: { color: "E8F1F5" }, color: TEAL, bold: true, align: "center" } },
-     { text: "Claude Code", options: { fill: { color: "FCEFE9" }, color: ACCENT, bold: true, align: "center" } }],
-    [{ text: "立ち位置", options: { bold: true, color: INK } },
-     { text: "相談する相手", options: { color: SLATE } },
-     { text: "作業する相手", options: { color: INK, bold: true } }],
-    [{ text: "出てくるもの", options: { bold: true, color: INK } },
-     { text: "文章・案・書かれたコード", options: { color: SLATE } },
-     { text: "書き換わったファイル・実行結果", options: { color: INK, bold: true } }],
-    [{ text: "こちらの作業", options: { bold: true, color: INK } },
-     { text: "読んで、選んで、自分で反映する", options: { color: SLATE } },
-     { text: "指示と、出てきたものの確認", options: { color: INK, bold: true } }],
-    [{ text: "向いている場面", options: { bold: true, color: INK } },
-     { text: "考えを整理する・発散させる", options: { color: SLATE } },
-     { text: "決まったことを終わらせる", options: { color: INK, bold: true } }],
+    [{ text: "", options: { fill: { color: BG } } },
+     { text: "チャット型のAI", options: hdr },
+     { text: "Claude Code", options: hdr2 }],
+    [{ text: "立ち位置", options: lcell }, { text: "相談する相手", options: mcell }, { text: "作業する相手", options: rcell }],
+    [{ text: "出てくるもの", options: lcell }, { text: "文章・案・書かれたコード", options: mcell }, { text: "書き換わったファイル・実行結果", options: rcell }],
+    [{ text: "こちらの作業", options: lcell }, { text: "読んで、選んで、自分で反映する", options: mcell }, { text: "指示と、出てきたものの確認", options: rcell }],
+    [{ text: "向いている場面", options: lcell }, { text: "考えを整理する・発散させる", options: mcell }, { text: "決まったことを終わらせる", options: rcell }],
   ];
   s.addTable(rows, {
     x: M, y: 2.5, w: W - M * 2, colW: [2.6, 4.6, 4.6],
@@ -263,7 +274,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   });
   s.addText("「どちらが優れているか」ではなく、渡すものが違う。考えを固めるのは前者、終わらせるのは後者。", {
     x: M, y: 6.25, w: W - M * 2, h: 0.5, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 13, color: MUTED,
+    fontFace: JP, fontSize: 13, color: DIM,
   });
   s.addNotes("比較を勝ち負けで語らない。役割分担として話すほうが納得されやすい。");
 }
@@ -272,7 +283,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 5. 誰でも使える
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "02", "誰でも使えるツール");
   heading(s, "コードが書けない人ほど、得をする", { w: 7.6 });
 
@@ -283,35 +294,38 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   ];
   rows.forEach((r, i) => {
     const y = 2.55 + i * 1.28;
-    s.addShape(pres.ShapeType.ellipse, { x: M, y: y + 0.06, w: 0.46, h: 0.46, fill: { color: ACCENT } });
+    s.addShape(pres.ShapeType.roundRect, {
+      x: M, y: y + 0.06, w: 0.46, h: 0.46, rectRadius: 0.05,
+      fill: { color: CYAN_BG }, line: { color: CYAN_LN, width: 1 },
+    });
     s.addText("✓", {
       x: M, y: y + 0.06, w: 0.46, h: 0.46, align: "center", valign: "middle", margin: 0,
-      fontFace: "Arial", fontSize: 15, bold: true, color: WHITE,
+      fontFace: "Arial", fontSize: 14, bold: true, color: CYAN,
     });
     s.addText(r[0], {
       x: M + 0.68, y: y, w: 6.6, h: 0.42, margin: 0, valign: "middle",
-      fontFace: JP, fontSize: 18, bold: true, color: INK,
+      fontFace: JP, fontSize: 18, bold: true, color: WHITE,
     });
     s.addText(r[1], {
       x: M + 0.68, y: y + 0.46, w: 6.6, h: 0.7, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 13, color: SLATE, lineSpacing: 21,
+      fontFace: JP, fontSize: 13, color: TXT, lineSpacing: 21,
     });
   });
 
   terminal(s, 8.35, 2.4, 4.2, 2.95, [
     { t: "> 請求書のPDFを月ごとに", b: true, c: WHITE },
     { t: "  フォルダ分けして", b: true, c: WHITE },
-    { t: "", c: "8C93A8" },
-    { t: "● 42件を確認しました", c: "9DC7B4" },
-    { t: "● 12フォルダに整理しました", c: "9DC7B4" },
+    { t: "", c: DIM },
+    { t: "● 42件を確認しました", c: CYAN },
+    { t: "● 12フォルダに整理しました", c: CYAN },
   ], { size: 13, lh: 26 });
   s.addText("コードが1行も出てこない使い方", {
     x: 8.35, y: 5.5, w: 4.2, h: 0.35, margin: 0, align: "center",
-    fontFace: JP, fontSize: 12, color: MUTED, italic: true,
+    fontFace: JP, fontSize: 12, color: DIM, italic: true,
   });
   s.addText("完璧に理解してから触ろうとしないこと。1個投げてみるのが早い", {
     x: M, y: 6.5, w: 7.6, h: 0.45, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 14, bold: true, color: ACCENT,
+    fontFace: JP, fontSize: 14, bold: true, color: CYAN,
   });
   s.addNotes("「今までは人に頼むか諦めるかの二択だった。そこに三つ目が増える」が一番刺さる言い方。");
 }
@@ -320,44 +334,42 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 6. 5体のAIエージェント
 // =========================================================================
 {
-  const s = darkSlide();
-  badge(s, "03", "5体のAIエージェントで実演", { dark: true });
-  heading(s, "作業を分けて、同時に持たせる", { dark: true });
+  const s = slide();
+  badge(s, "03", "5体のAIエージェントで実演");
+  heading(s, "作業を分けて、同時に持たせる");
 
   const lx = M, lw = 7.5;
-  // 逐次
   s.addText("1体で順番に", {
     x: lx, y: 2.5, w: lw, h: 0.32, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: MUTED_D, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: DIM, charSpacing: 1.5,
   });
   for (let i = 0; i < 5; i++) {
     s.addShape(pres.ShapeType.roundRect, {
-      x: lx + i * 1.5, y: 2.92, w: 1.34, h: 0.5, rectRadius: 0.06,
-      fill: { color: "2C3346" }, line: { color: "3B4459", width: 1 },
+      x: lx + i * 1.5, y: 2.92, w: 1.34, h: 0.5, rectRadius: 0.05,
+      fill: { color: PANEL }, line: { color: LINE, width: 1 },
     });
     s.addText(String(i + 1), {
       x: lx + i * 1.5, y: 2.92, w: 1.34, h: 0.5, align: "center", valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 12, color: MUTED_D,
+      fontFace: "Courier New", fontSize: 12, color: DIM,
     });
   }
   s.addText("待ち時間 × 5", {
     x: lx, y: 3.5, w: lw, h: 0.32, margin: 0,
-    fontFace: JP, fontSize: 12, color: MUTED, italic: true,
+    fontFace: JP, fontSize: 12, color: DIM, italic: true,
   });
 
-  // 並列
   s.addText("5体で同時に", {
     x: lx, y: 4.15, w: lw, h: 0.32, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN, charSpacing: 1.5,
   });
   for (let i = 0; i < 5; i++) {
     s.addShape(pres.ShapeType.roundRect, {
-      x: lx, y: 4.57 + i * 0.42, w: 1.34, h: 0.32, rectRadius: 0.05,
-      fill: { color: ACCENT }, line: { color: ACCENT, width: 0 },
+      x: lx, y: 4.57 + i * 0.42, w: 1.34, h: 0.32, rectRadius: 0.04,
+      fill: { color: CYAN }, line: { color: CYAN, width: 0 },
     });
     s.addText(String(i + 1), {
       x: lx, y: 4.57 + i * 0.42, w: 1.34, h: 0.32, align: "center", valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 11, bold: true, color: WHITE,
+      fontFace: "Courier New", fontSize: 11, bold: true, color: "07231F",
     });
   }
   s.addText("待ち時間 × 1", {
@@ -365,21 +377,18 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
     fontFace: JP, fontSize: 14, bold: true, color: WHITE,
   });
 
-  s.addShape(pres.ShapeType.roundRect, {
-    x: 8.6, y: 2.5, w: 3.95, h: 4.15, rectRadius: 0.1,
-    fill: { color: INK2 }, line: { color: "2E3648", width: 1 },
-  });
+  panel(s, 8.6, 2.5, 3.95, 4.15, { fill: PANEL, lineColor: VIO_LN });
   s.addText("速い理由", {
     x: 8.95, y: 2.85, w: 3.25, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: VIOLET, charSpacing: 1.5,
   });
   s.addText("「たくさん動くから」ではなく、待ち時間が重なるから。1個ずつなら5回待つところが、1回分で終わる。", {
     x: 8.95, y: 3.25, w: 3.25, h: 1.2, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13, color: "D7DBE6", lineSpacing: 22,
+    fontFace: JP, fontSize: 13, color: TXT, lineSpacing: 22,
   });
   s.addText("向き・不向き", {
     x: 8.95, y: 4.6, w: 3.25, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 1.5,
+    fontFace: JP, fontSize: 13, bold: true, color: VIOLET, charSpacing: 1.5,
   });
   s.addText([
     { text: "向く：互いに関係のない作業", options: { bullet: true, breakLine: true } },
@@ -387,7 +396,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
     { text: "最初にやるなら「調べる」を分ける", options: { bullet: true } },
   ], {
     x: 8.95, y: 5.0, w: 3.25, h: 1.4, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 12, color: "D7DBE6", paraSpaceAfter: 7,
+    fontFace: JP, fontSize: 12, color: TXT, paraSpaceAfter: 7,
   });
   s.addNotes("何でも並列にすればいいわけではない、と必ず添える。ここを言わないと薄い話になる。");
 }
@@ -396,8 +405,9 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 7. 願望の質（ステートメント）
 // =========================================================================
 {
-  const s = darkSlide();
-  badge(s, "04", "願望の質＝アウトプットの質", { dark: true });
+  const s = slide();
+  dotGrid(s, 0.75, 5.75, 12, 3);
+  badge(s, "04", "願望の質＝アウトプットの質");
 
   s.addText("願望の質が、\nそのまま出力の質になる", {
     x: M, y: 1.8, w: 7.3, h: 2.2, margin: 0,
@@ -405,35 +415,35 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   });
   s.addText("AIの出してくるものが微妙なとき、原因はAIではないことが多い。\n自分が何を欲しいか分かっていない分だけ、出力もボヤける。", {
     x: M, y: 4.2, w: 7.3, h: 1.0, margin: 0,
-    fontFace: JP, fontSize: 15, color: MUTED_D, lineSpacing: 28,
+    fontFace: JP, fontSize: 15, color: TXT, lineSpacing: 28,
   });
 
-  card(s, 8.35, 1.85, 4.2, 1.75, { fill: INK2, lineColor: "2E3648" });
+  panel(s, 8.35, 1.85, 4.2, 1.75);
   s.addText("雑な指示", {
     x: 8.7, y: 2.1, w: 3.5, h: 0.3, margin: 0,
-    fontFace: JP, fontSize: 12, bold: true, color: MUTED, charSpacing: 1.5,
+    fontFace: JP, fontSize: 12, bold: true, color: DIM, charSpacing: 1.5,
   });
   s.addText("「いい感じにして」", {
     x: 8.7, y: 2.45, w: 3.5, h: 0.42, margin: 0,
-    fontFace: JP, fontSize: 17, bold: true, color: "D7DBE6",
+    fontFace: JP, fontSize: 17, bold: true, color: TXT,
   });
   s.addText("→ いい感じの何かが返ってくる", {
     x: 8.7, y: 2.92, w: 3.5, h: 0.42, margin: 0,
-    fontFace: JP, fontSize: 12.5, color: MUTED,
+    fontFace: JP, fontSize: 12.5, color: DIM,
   });
 
-  card(s, 8.35, 3.85, 4.2, 2.4, { fill: "FCEFE9", line: false });
+  panel(s, 8.35, 3.85, 4.2, 2.4, { fill: CYAN_BG, lineColor: CYAN_LN });
   s.addText("3行足した指示", {
     x: 8.7, y: 4.1, w: 3.5, h: 0.3, margin: 0,
-    fontFace: JP, fontSize: 12, bold: true, color: ACCENT, charSpacing: 1.5,
+    fontFace: JP, fontSize: 12, bold: true, color: CYAN, charSpacing: 1.5,
   });
   s.addText("「新規の顧客向けに、\n問い合わせを減らす目的で、\nFAQ 10問が出たら完了」", {
     x: 8.7, y: 4.45, w: 3.5, h: 1.15, margin: 0,
-    fontFace: JP, fontSize: 14, bold: true, color: INK, lineSpacing: 24,
+    fontFace: JP, fontSize: 14, bold: true, color: WHITE, lineSpacing: 24,
   });
   s.addText("→ 返ってくるものが別物になる", {
     x: 8.7, y: 5.65, w: 3.5, h: 0.42, margin: 0,
-    fontFace: JP, fontSize: 12.5, color: SLATE,
+    fontFace: JP, fontSize: 12.5, color: CYAN,
   });
   s.addNotes("ここが動画で一番引用されやすい論点。実例は自分の仕事から出すと強い。");
 }
@@ -442,7 +452,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 8. 言語化の3行フレーム
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "04", "言語化が全て");
   heading(s, "指示に足すのは、この3行だけでいい");
 
@@ -454,29 +464,32 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   const cw = 3.75, gx = 0.28;
   items.forEach((it, i) => {
     const x = M + i * (cw + gx);
-    card(s, x, 2.5, cw, 3.1, { fill: CARD });
-    s.addShape(pres.ShapeType.ellipse, { x: x + 0.35, y: 2.85, w: 0.5, h: 0.5, fill: { color: ACCENT } });
+    panel(s, x, 2.5, cw, 3.1);
+    s.addShape(pres.ShapeType.roundRect, {
+      x: x + 0.35, y: 2.85, w: 0.5, h: 0.5, rectRadius: 0.05,
+      fill: { color: CYAN_BG }, line: { color: CYAN_LN, width: 1 },
+    });
     s.addText(String(i + 1), {
       x: x + 0.35, y: 2.85, w: 0.5, h: 0.5, align: "center", valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 14, bold: true, color: WHITE,
+      fontFace: "Courier New", fontSize: 14, bold: true, color: CYAN,
     });
     s.addText(it[0], {
       x: x + 0.35, y: 3.55, w: cw - 0.7, h: 0.45, margin: 0,
-      fontFace: JP, fontSize: 17, bold: true, color: INK,
+      fontFace: JP, fontSize: 17, bold: true, color: WHITE,
     });
     s.addText(it[1], {
       x: x + 0.35, y: 4.05, w: cw - 0.7, h: 0.6, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 12.5, color: SLATE, lineSpacing: 21,
+      fontFace: JP, fontSize: 12.5, color: TXT, lineSpacing: 21,
     });
     s.addText("例）" + it[2], {
       x: x + 0.35, y: 4.75, w: cw - 0.7, h: 0.62, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 12.5, color: ACCENT, italic: true, lineSpacing: 21,
+      fontFace: JP, fontSize: 12.5, color: CYAN, italic: true, lineSpacing: 21,
     });
   });
 
   s.addText("これはAIを使う技術ではなく、欲しいものを言葉にする技術。伸ばすとAI以外の仕事も速くなる。", {
     x: M, y: 6.0, w: W - M * 2, h: 0.5, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 15, bold: true, color: ACCENT,
+    fontFace: JP, fontSize: 15, bold: true, color: CYAN,
   });
   s.addNotes("3行フレームは持ち帰りやすいので、資料の中で一番使われるページになりやすい。");
 }
@@ -485,52 +498,52 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 9. Skills
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "05", "Skills活用法");
   heading(s, "一度書けば、二度と説明しなくていい");
 
   const cw = 5.75;
-  card(s, M, 2.5, cw, 2.55, { fill: CARD });
+  panel(s, M, 2.5, cw, 2.55);
   s.addText("CLAUDE.md", {
     x: M + 0.42, y: 2.8, w: cw - 0.84, h: 0.42, margin: 0,
-    fontFace: JP, fontSize: 19, bold: true, color: INK,
+    fontFace: "Courier New", fontSize: 19, bold: true, color: WHITE,
   });
   s.addText("前提を置いておく", {
     x: M + 0.42, y: 3.24, w: cw - 0.84, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: MUTED,
+    fontFace: JP, fontSize: 13, bold: true, color: DIM,
   });
   s.addText("プロジェクトのルール、うちのやり方、触ってほしくない場所。1回書けば毎回読まれるので、説明のやり直しが消える。", {
     x: M + 0.42, y: 3.68, w: cw - 0.84, h: 1.1, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13, color: SLATE, lineSpacing: 22,
+    fontFace: JP, fontSize: 13, color: TXT, lineSpacing: 22,
   });
 
   const x2 = M + cw + 0.3;
-  card(s, x2, 2.5, cw, 2.55, { fill: "FCEFE9", lineColor: "F0C9B8" });
+  panel(s, x2, 2.5, cw, 2.55, { fill: CYAN_BG, lineColor: CYAN_LN });
   s.addText("Skills（SKILL.md）", {
     x: x2 + 0.42, y: 2.8, w: cw - 0.84, h: 0.42, margin: 0,
-    fontFace: JP, fontSize: 19, bold: true, color: INK,
+    fontFace: JP, fontSize: 19, bold: true, color: WHITE,
   });
   s.addText("手順そのものを預ける", {
     x: x2 + 0.42, y: 3.24, w: cw - 0.84, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN,
   });
   s.addText("「この作業はこう進める」を書いておくと、その場面が来たときに自分で読み込み、その通りに動く。", {
     x: x2 + 0.42, y: 3.68, w: cw - 0.84, h: 1.1, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13, color: INK2, lineSpacing: 22,
+    fontFace: JP, fontSize: 13, color: WHITE, lineSpacing: 22,
   });
 
-  card(s, M, 5.3, W - M * 2, 1.4, { fill: INK, line: false });
+  panel(s, M, 5.3, W - M * 2, 1.4, { fill: VIO_BG, lineColor: VIO_LN });
   s.addText("効くのは速さより、頭の中にしかなかった「うちのやり方」が外に出ること。", {
     x: M + 0.5, y: 5.55, w: 8.0, h: 0.42, margin: 0, valign: "middle",
     fontFace: JP, fontSize: 15, bold: true, color: WHITE,
   });
   s.addText("人に引き継ぐときにも、そのまま渡せる。", {
     x: M + 0.5, y: 6.0, w: 8.0, h: 0.4, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 13, color: MUTED_D,
+    fontFace: JP, fontSize: 13, color: TXT,
   });
   s.addText("同じ説明を\n2回したら、書く", {
     x: 9.1, y: 5.5, w: 3.35, h: 1.0, margin: 0, align: "right", valign: "middle",
-    fontFace: JP, fontSize: 16, bold: true, color: ACCENT, lineSpacing: 26,
+    fontFace: JP, fontSize: 16, bold: true, color: VIOLET, lineSpacing: 26,
   });
   s.addNotes("判断基準を1つだけ渡すのが大事。「2回説明したら書く」以外は覚えてもらわなくていい。");
 }
@@ -539,7 +552,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 10. 経営者こそ
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   badge(s, "06", "経営者こそ使うべき");
   heading(s, "「詳しい人に任せる」が、いちばん損をする");
 
@@ -553,19 +566,20 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   items.forEach((it, i) => {
     const x = M + (i % 2) * (cw + gx);
     const y = 2.5 + Math.floor(i / 2) * (chh + gy);
-    card(s, x, y, cw, chh, { fill: i < 2 ? CARD : "FCEFE9", lineColor: i < 2 ? LINE : "F0C9B8" });
+    const warm = i >= 2;
+    panel(s, x, y, cw, chh, warm ? { fill: CYAN_BG, lineColor: CYAN_LN } : {});
     s.addText(it[0], {
       x: x + 0.42, y: y + 0.28, w: cw - 0.84, h: 0.42, margin: 0, valign: "middle",
-      fontFace: JP, fontSize: 17, bold: true, color: INK,
+      fontFace: JP, fontSize: 17, bold: true, color: WHITE,
     });
     s.addText(it[1], {
       x: x + 0.42, y: y + 0.75, w: cw - 0.84, h: 0.8, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 12.5, color: SLATE, lineSpacing: 21,
+      fontFace: JP, fontSize: 12.5, color: warm ? WHITE : TXT, lineSpacing: 21,
     });
   });
   s.addText("全部を自分でやる必要はない。1個だけ最後まで自分の手で通すと、判断の精度が変わる。", {
     x: M, y: 6.45, w: W - M * 2, h: 0.5, margin: 0, valign: "middle",
-    fontFace: JP, fontSize: 15, bold: true, color: ACCENT,
+    fontFace: JP, fontSize: 15, bold: true, color: CYAN,
   });
   s.addNotes("経営者向けの結論は「全部やれ」ではなく「1個だけ通せ」。ここを外すと実行されない。");
 }
@@ -574,10 +588,10 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 11. 明日からの一歩
 // =========================================================================
 {
-  const s = lightSlide();
+  const s = slide();
   s.addText("NEXT ACTION", {
     x: M, y: 0.62, w: 6, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 13, bold: true, color: ACCENT, charSpacing: 2.5,
+    fontFace: JP, fontSize: 13, bold: true, color: CYAN, charSpacing: 2.5,
   });
   heading(s, "明日からやること、3つ", { y: 1.05 });
 
@@ -589,20 +603,21 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
   steps.forEach((st, i) => {
     const y = 2.4 + i * 1.45;
     s.addShape(pres.ShapeType.roundRect, {
-      x: M, y: y, w: 1.5, h: 1.15, rectRadius: 0.08,
-      fill: { color: i === 0 ? ACCENT : INK }, line: { color: i === 0 ? ACCENT : INK, width: 0 },
+      x: M, y: y, w: 1.5, h: 1.15, rectRadius: 0.06,
+      fill: { color: i === 0 ? CYAN : PANEL },
+      line: { color: i === 0 ? CYAN : LINE, width: 1 },
     });
     s.addText(st[0], {
       x: M, y: y, w: 1.5, h: 1.15, align: "center", valign: "middle", margin: 0,
-      fontFace: JP, fontSize: 13, bold: true, color: WHITE, charSpacing: 1,
+      fontFace: "Courier New", fontSize: 13, bold: true, color: i === 0 ? "07231F" : DIM, charSpacing: 1,
     });
     s.addText(st[1], {
       x: M + 1.8, y: y + 0.1, w: 9.9, h: 0.45, margin: 0, valign: "middle",
-      fontFace: JP, fontSize: 19, bold: true, color: INK,
+      fontFace: JP, fontSize: 19, bold: true, color: WHITE,
     });
     s.addText(st[2], {
       x: M + 1.8, y: y + 0.6, w: 9.9, h: 0.5, margin: 0, valign: "top",
-      fontFace: JP, fontSize: 13, color: SLATE, lineSpacing: 21,
+      fontFace: JP, fontSize: 13, color: TXT, lineSpacing: 21,
     });
   });
   s.addNotes("3つとも「今日中に着手できる大きさ」に落としてある。");
@@ -612,7 +627,7 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 // 12. 出典・注記
 // =========================================================================
 {
-  const s = darkSlide();
+  const s = slide();
   s.addText("出典・注記", {
     x: M, y: 1.1, w: 8, h: 0.6, margin: 0,
     fontFace: JP, fontSize: 30, bold: true, color: WHITE,
@@ -620,20 +635,20 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
 
   s.addText("元動画", {
     x: M, y: 2.15, w: 11.8, h: 0.3, margin: 0,
-    fontFace: JP, fontSize: 12, bold: true, color: ACCENT, charSpacing: 2,
+    fontFace: JP, fontSize: 12, bold: true, color: CYAN, charSpacing: 2,
   });
   s.addText("【Claude Code完全入門】誰でも使えるツール／実行革命／ChatGPTとの違い／5体のAIエージェントで実演／\n願望の質＝アウトプットの質／Skills活用法／経営者こそ使うべき／言語化が全て（2026年3月公開）", {
     x: M, y: 2.5, w: 11.8, h: 0.8, margin: 0,
-    fontFace: JP, fontSize: 13, color: "D7DBE6", lineSpacing: 24,
+    fontFace: JP, fontSize: 13, color: TXT, lineSpacing: 24,
   });
   s.addText("https://youtu.be/LRSSjGwsuv0", {
     x: M, y: 3.3, w: 11.8, h: 0.35, margin: 0,
-    fontFace: "Arial", fontSize: 12, color: MUTED_D,
+    fontFace: "Courier New", fontSize: 12, color: DIM,
   });
 
   s.addText("本資料の作り方", {
     x: M, y: 4.0, w: 11.8, h: 0.3, margin: 0,
-    fontFace: JP, fontSize: 12, bold: true, color: ACCENT, charSpacing: 2,
+    fontFace: JP, fontSize: 12, bold: true, color: CYAN, charSpacing: 2,
   });
   s.addText([
     { text: "本編映像・字幕は取得できていない。タイトルに並ぶ8つの論点と、Claude Code の実際の仕様をもとに構成している", options: { bullet: true, breakLine: true } },
@@ -641,12 +656,12 @@ function terminal(s, x, y, w, h, lines, opts = {}) {
     { text: "料金・プラン・モデル世代は変わるため、意図的に触れていない。必要なら公式ドキュメントを参照", options: { bullet: true } },
   ], {
     x: M, y: 4.4, w: 11.8, h: 1.5, margin: 0, valign: "top",
-    fontFace: JP, fontSize: 13, color: "D7DBE6", paraSpaceAfter: 10, lineSpacing: 22,
+    fontFace: JP, fontSize: 13, color: TXT, paraSpaceAfter: 10, lineSpacing: 22,
   });
 
   s.addText("takuha", {
     x: M, y: 6.45, w: 11.8, h: 0.35, margin: 0,
-    fontFace: JP, fontSize: 12, color: MUTED, charSpacing: 1,
+    fontFace: JP, fontSize: 12, color: DIM, charSpacing: 1,
   });
   s.addNotes("引用前提で配る場合は、この注記ページを外さないこと。");
 }

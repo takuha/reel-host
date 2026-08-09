@@ -6,7 +6,7 @@
 
 | ファイル | 中身 |
 | --- | --- |
-| `claude-code-summary.pptx` | 本体（16:9 / 12ページ / 発表者ノート入り） |
+| `claude-code-summary.pptx` | 本体（16:9 / 12ページ / 発表者ノート入り / ダークテーマ） |
 | `claude-code-summary.pdf` | 配布・印刷用の書き出し（発表者ノートは入らない） |
 | `build.js` | この pptx を生成しているスクリプト |
 
@@ -47,7 +47,12 @@ npm install pptxgenjs
 node build.js claude-code-summary.pptx
 ```
 
-配色は `build.js` の先頭にまとまっている。`ACCENT` を差し替えればトーンが一括で変わる。
+配色は `build.js` の先頭にまとまっている。全ページ暗背景で、アクセントは
+`CYAN`（主）と `VIOLET`（従）の2色だけ。ここを差し替えればトーンが一括で変わる。
+
+背景の粒はグラデーションでもぼかしでもなく、小さい点を並べた `dotGrid()` で出している。
+**pptx はグラデーション塗りとぼかしに対応していない**ので、光彩を重ね塗りで作ると
+同心円の輪郭が見えてしまう。表紙と7ページ目だけに入れて、他は素の暗背景にしてある。
 
 PDF を作り直すときは PowerPoint から書き出すのがいちばん確実。手元に PowerPoint が
 ないなら LibreOffice でも出せる。
