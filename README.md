@@ -177,10 +177,13 @@ REEL_FETCH_COOKIES=~/cookies.txt ./reel_post.sh publish aoyagi "<url>" "本文"
 
 | 部分 | どこから |
 | --- | --- |
-| `第N話｜題材` | ファイル名の番号と台本の `title` |
+| `第N話｜題材` | ファイル名の番号と台本の `title`。「話」は `series.md` の `counter` で変えられる（`回` など） |
 | 本文 | 台本の `## キャプション` |
 | CTA | `series.md` の `## CTA` |
 | ハッシュタグ | `series.md` の `hashtags` ＋ 台本の `hashtags` |
+
+台本は Markdown だが、投稿本文はただの文字列なので `**強調**` は `**` を落として出す。
+台本側では読みやすさのために使ってよい。
 
 `<話>` は番号でもスラッグの一部でもファイルパスでもいい。`1` も `001` も `hanaya` も
 同じ回を指す。当てはまる回が複数あるときは、候補を出して止まる。
@@ -190,8 +193,14 @@ REEL_FETCH_COOKIES=~/cookies.txt ./reel_post.sh publish aoyagi "<url>" "本文"
 
 ### シリーズを増やす
 
-既定は `series/ai-business`（「もしもこれをAI駆使してちゃんとビジネスしたら？」）。
-別のシリーズは `REEL_SERIES` で切り替える。
+今あるのは2つ。
+
+| ディレクトリ | シリーズ | 中身 |
+| --- | --- | --- |
+| `series/ai-business` | もしもこれをAI駆使してちゃんとビジネスしたら？ | 身近な商売をAI前提で組み直す。数回に1回、実際に飛んだ事例の「裏返しの回」を挟む |
+| `series/number-trick` | その数字、誰の財布から出た？ | ニュースの大きな金額を、実際に動いた金まで追う |
+
+既定は `series/ai-business`。別のシリーズは `REEL_SERIES` で切り替える。
 
 ```sh
 REEL_SERIES=other ./reel_series.sh list

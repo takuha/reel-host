@@ -263,15 +263,24 @@ cmd_new() {
 	printf '%s\n' "${file#"$REPO_ROOT"/}"
 }
 
+# 台本は Markdown だが、投稿本文はただの文字列。** はそのまま出てしまうので落とす。
+strip_markdown() {
+	sed -e 's/\*\*//g'
+}
+
 # 話数・本文・CTA・ハッシュタグをつないで投稿本文にする。
 build_caption() {
-	local file="$1" series body cta tags ep_tags caption
+	local file="$1" series counter body cta tags ep_tags caption
 	series="$(series_file)"
 
 	body="$(section "$file" キャプション)"
 	[ -n "$body" ] || die "「## キャプション」が空: ${file#"$REPO_ROOT"/}"
 
-	caption="$(printf '第%d話｜%s' "$((10#$(episode_number "$file")))" "$(meta_get "$file" title)")"
+	# 「第N話」か「第N回」か。シリーズによって数え方が違う。
+	counter="$(meta_get "$series" counter)"
+	[ -n "$counter" ] || counter='話'
+
+	caption="$(printf '第%d%s｜%s' "$((10#$(episode_number "$file")))" "$counter" "$(meta_get "$file" title)")"
 	caption="$caption"$'\n\n'"$body"
 
 	cta="$(section "$series" CTA)"
@@ -282,7 +291,7 @@ build_caption() {
 	tags="$tags${ep_tags:+ $ep_tags}"
 	[ -n "$tags" ] && caption="$caption"$'\n\n'"$tags"
 
-	printf '%s\n' "$caption"
+	printf '%s\n' "$caption" | strip_markdown
 }
 
 cmd_caption() {
