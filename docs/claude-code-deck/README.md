@@ -7,6 +7,7 @@
 | ファイル | 中身 |
 | --- | --- |
 | `claude-code-summary.pptx` | 本体（16:9 / 12ページ / 発表者ノート入り） |
+| `claude-code-summary.pdf` | 配布・印刷用の書き出し（発表者ノートは入らない） |
 | `build.js` | この pptx を生成しているスクリプト |
 
 > **注記**: 本編映像・字幕は取得できていない。本資料はタイトルに並んだ8つの論点と、
@@ -47,6 +48,16 @@ node build.js claude-code-summary.pptx
 ```
 
 配色は `build.js` の先頭にまとまっている。`ACCENT` を差し替えればトーンが一括で変わる。
+
+PDF を作り直すときは PowerPoint から書き出すのがいちばん確実。手元に PowerPoint が
+ないなら LibreOffice でも出せる。
+
+```sh
+soffice --headless --convert-to pdf claude-code-summary.pptx
+```
+
+同梱の PDF は LibreOffice で書き出したもの。**日本語は Yu Gothic ではなく代替フォントで
+出ている**ので、フォントまで揃えたいなら PowerPoint から書き出し直すこと。
 
 ## フォントについて
 
