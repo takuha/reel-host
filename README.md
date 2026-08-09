@@ -156,6 +156,11 @@ RETENTION_DAYS=7 ./cleanup.sh # 保持期間を変える
 
 `videos/<account>/` に置いた動画もそのまま対象になる。
 
+自動実行は GitHub Actions（`.github/workflows/cleanup.yml`）。手元の PC が起動している
+必要はない。Actions タブから `cleanup` を選んで手動実行もでき、そのとき `--dry-run` と
+保持期間を指定できる。**定時実行はデフォルトブランチに置かれたワークフローしか走らない**
+ので、このファイルは `main` にある必要がある。
+
 ## つながらないとき
 
 まず `check` を打つ。エラーの内容と、**そのトークンで実際に使えるアカウントの一覧**が

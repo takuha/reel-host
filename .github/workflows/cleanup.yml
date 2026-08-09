@@ -1,0 +1,48 @@
+name: cleanup
+
+# 消し忘れた動画を時間経過で拾う保険。毎朝9時(JST)に走る。
+# cron は UTC なので 00:00 UTC = 09:00 JST。日本は夏時間が無いので通年ずれない。
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '削除せず対象だけ表示する'
+        type: boolean
+        default: false
+      retention_days:
+        description: '保持期間(日)。空なら既定の3日'
+        type: string
+        default: ''
+
+# 削除コミットを push するので書き込みが要る
+permissions:
+  contents: write
+
+# 手動実行と定時実行が重なると push が衝突するので直列化する
+concurrency:
+  group: cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # cleanup.sh は「そのファイルを最後に変更したコミットの日時」で判定する。
+          # 浅いクローンだと履歴が引けず、何も消せないまま成功して見える。
+          fetch-depth: 0
+
+      - name: git の実行者を設定
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: cleanup.sh
+        # 定時実行では inputs が空になる。空文字は cleanup.sh 側の :- が既定値に倒すので
+        # そのまま渡してよい。
+        env:
+          RETENTION_DAYS: ${{ inputs.retention_days }}
+        run: ./cleanup.sh ${{ inputs.dry_run && '--dry-run' || '' }}
