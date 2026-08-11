@@ -6,7 +6,7 @@
 | ディレクトリ | 何の素材か | 出せる形 |
 | --- | --- | --- |
 | [`claude-code-deck/`](claude-code-deck/) | Claude Code 入門の講義・共有用スライド（12ページ） | `.pptx` / `.pdf` |
-| [`claude-code-reels/`](claude-code-reels/) | 同じ内容を短尺動画に落とした台本（6本）と構成資料 | Markdown |
+| [`claude-code-reels/`](claude-code-reels/) | 同じ内容を短尺動画に落とした台本（6本）と構成資料 | Markdown ／ 投稿用キャプションは `captions/*.txt` |
 
 どちらも元ネタは同じ YouTube 動画（【Claude Code完全入門】/ https://youtu.be/LRSSjGwsuv0 ）。
 スライドと台本は**同じ論点の分解を共有している**ので、片方を直したらもう片方も見ること。

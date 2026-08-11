@@ -117,11 +117,18 @@ R2・R5・R6 は伸びより「残る」側なので後半に置く。
 ```sh
 ./reel_post.sh accounts                                    # 投稿先の確認
 ./reel_post.sh check takuha                                # 接続確認（投稿前に必ず）
-./reel_post.sh publish takuha ~/Movies/r1.mp4 "$(cat caption_r1.txt)"
+./reel_post.sh publish takuha ~/Movies/r1.mp4 "$(cat docs/consulting/claude-code-reels/captions/caption_r1.txt)"
 ```
 
-キャプションは各台本の「投稿本文」をそのまま `.txt` に落として渡す。改行が入るので
-シェルに直書きせず、ファイル経由にすること。
+キャプションは [`captions/`](captions/) に `caption_r1.txt` 〜 `caption_r6.txt` として
+書き出してある。各台本の「投稿本文」とハッシュタグをそのまま入れたもの。**改行が入るので
+シェルに直書きせず、必ずファイル経由で渡すこと。**
+
+台本の投稿本文を直したら、キャプションも作り直す。`scripts.md` から機械的に起こせる。
+
+```sh
+python3 docs/consulting/claude-code-reels/captions/build_captions.py
+```
 
 投稿後の動画は `publish` が消すが、途中で失敗した分は残る。3日経てば `cleanup.sh` が
 拾うので放置してよい。急ぐなら `./reel_host.sh clean takuha` を打つ。
