@@ -278,3 +278,22 @@ videos/aoyagi/reel001.mp4
 
 必要なコマンドは `curl` と、`jq` または `python3` のどちらか。URL から投稿するなら
 これに `yt-dlp` が加わる。
+
+## Claude Code で使う
+
+`.mcp.json` と `.claude/skills/` を同梱してある。このリポジトリを開けばそのまま効く。
+
+| 入っているもの | 用途 |
+| --- | --- |
+| `reel-caption` スキル | 投稿の本文を書く／AIっぽい文章を直す |
+| Context7 (MCP) | Meta Graph API の最新ドキュメントを引く |
+| GitHub MCP | PR・Actions・Pages の状態を見る |
+
+`REEL_GRAPH_VERSION` のバージョン切れは Context7 に Graph API の最新版を引かせると早い。
+
+MCP は環境変数を読む。使う前にシェルへ入れておく（`.env` とは別。トークンの性質が違う）。
+
+```sh
+export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...   # GitHub MCP に必要
+export CONTEXT7_API_KEY=...                   # 無くても動く。入れるとレート制限が緩む
+```
