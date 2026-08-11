@@ -36,12 +36,13 @@ usage() {
   reel_post.sh check <account>                トークンがそのアカウントに通るか確かめる
   reel_post.sh refresh <account>              トークンを長期（60日）に延長して .env を更新
   reel_post.sh post <account> <url> [caption] 公開済みURLの動画を投稿する
-  reel_post.sh publish <account> <file> [caption]
+  reel_post.sh publish <account> <file|url> [caption]
                                               ホスティングから投稿まで一気にやる
 
 例:
   reel_post.sh check aoyagi
   reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "今日の一本"
+  reel_post.sh publish aoyagi https://vt.tiktok.com/XXXXXXXX/ "今日の一本"
 
 つながらないときは check から。エラーの原因がそのまま出る。
 EOS
@@ -310,19 +311,22 @@ cmd_post() {
 }
 
 cmd_publish() {
-	local account="${1:-}" file="${2:-}" caption="${3:-}"
+	local account="${1:-}" source="${2:-}" caption="${3:-}"
 	[ -n "$account" ] || die 'アカウント名が指定されていない'
-	[ -n "$file" ] || die '動画ファイルが指定されていない'
-	[ -f "$file" ] || die "ファイルが見つからない: $file"
+	[ -n "$source" ] || die '動画ファイルか動画URLが指定されていない'
 
+	# 手元のファイルでも共有URLでも add がそのまま受ける。URL のときは add が
+	# 落としてから載せる。Graph API に渡せるのは自分で公開したURLだけなので、
+	# TikTok のページURLをそのまま投げても通らない。
 	local url
-	url="$("$REPO_ROOT/reel_host.sh" add "$account" "$file")"
+	url="$("$REPO_ROOT/reel_host.sh" add "$account" "$source")"
 	printf '公開URL: %s\n' "$url" >&2
 
 	cmd_post "$account" "$url" "$caption"
 
-	# 投稿が通った分だけ消す。まだ投稿していない動画は残す。
-	"$REPO_ROOT/reel_host.sh" clean "$account" "$(basename "$file")"
+	# 投稿が通った分だけ消す。まだ投稿していない動画は残す。公開URLの末尾が
+	# そのままホスティング中のファイル名なので、元がURLでも名前を特定できる。
+	"$REPO_ROOT/reel_host.sh" clean "$account" "$(basename "$url")"
 }
 
 main() {

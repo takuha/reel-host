@@ -28,13 +28,14 @@ die() {
 usage() {
 	cat <<'EOS'
 使い方:
-  reel_host.sh add <account> <video-file>  動画を公開して URL を出す
-  reel_host.sh url <account> <name>        公開 URL を組み立てて出す
-  reel_host.sh list [account]              ホスティング中の動画を出す
-  reel_host.sh clean [account] [name]      投稿済み動画を消す（省略時は全アカウント）
+  reel_host.sh add <account> <video-file|url>  動画を公開して URL を出す
+  reel_host.sh url <account> <name>            公開 URL を組み立てて出す
+  reel_host.sh list [account]                  ホスティング中の動画を出す
+  reel_host.sh clean [account] [name]          投稿済み動画を消す（省略時は全アカウント）
 
 アカウントごとに videos/<account>/ に分けて置く。例:
   reel_host.sh add aoyagi ~/Movies/reel001.mp4
+  reel_host.sh add aoyagi https://vt.tiktok.com/XXXXXXXX/
 EOS
 }
 
@@ -77,10 +78,20 @@ wait_until_live() {
 cmd_add() {
 	local account="${1:-}" src="${2:-}"
 	validate_account "$account"
-	[ -n "$src" ] || die '動画ファイルが指定されていない'
-	[ -f "$src" ] || die "ファイルが見つからない: $src"
+	[ -n "$src" ] || die '動画ファイルか動画URLが指定されていない'
 
+	# 長いダウンロードを始める前にブランチを見る。後で弾かれると取り直しになる。
 	require_branch
+
+	# 共有URLを渡されたら、まず手元に落としてから載せる。
+	local fetched=''
+	case "$src" in
+	http://* | https://*)
+		fetched="$("$REPO_ROOT/reel_fetch.sh" "$src")"
+		src="$fetched"
+		;;
+	esac
+	[ -f "$src" ] || die "ファイルが見つからない: $src"
 
 	local name dest
 	name="$(safe_name "$(basename "$src")")"
@@ -88,6 +99,13 @@ cmd_add() {
 
 	mkdir -p "$REPO_ROOT/$VIDEO_DIR/$account"
 	cp "$src" "$REPO_ROOT/$dest"
+
+	# 落としてきただけのファイルは、リポジトリに取り込んだ時点で用済み。
+	# 元から手元にあったファイルには触らない。
+	if [ -n "$fetched" ]; then
+		rm -f "$fetched"
+		rmdir "$(dirname "$fetched")" 2>/dev/null || true
+	fi
 
 	git -C "$REPO_ROOT" add -- "$dest"
 	if git -C "$REPO_ROOT" diff --cached --quiet; then
