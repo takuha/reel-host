@@ -71,6 +71,7 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 ./reel_post.sh check aoyagi                               # 接続確認
 ./reel_post.sh refresh aoyagi                             # トークンを60日に延長
 ./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "本文" # 公開→投稿→後片付け
+./reel_post.sh next aoyagi "本文"                          # キューの先頭を投稿→後片付け
 ```
 
 `publish` は「ホスティング → 投稿 → 投稿できた分だけ削除」までやる。まだ投稿して
@@ -87,6 +88,25 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 
 `add` は GitHub Pages が実際に配信を始めるまで待ってから URL を出す。プッシュ直後は
 まだ 404 で、待たずに Graph API へ渡すと動画取得に失敗するため。
+
+## 投稿順を決めて溜めておく
+
+複数本を先に `add` だけしておいて、決めた順に1本ずつ投稿したいときは `next` を使う。
+
+```sh
+./reel_host.sh add aoyagi ~/Movies/01_intro.mp4
+./reel_host.sh add aoyagi ~/Movies/02_main.mp4
+./reel_host.sh add aoyagi ~/Movies/03_outro.mp4
+
+./reel_post.sh next aoyagi "本文"   # videos/aoyagi/ の先頭（ファイル名順）を投稿して消す
+```
+
+順序は `videos/<account>/` 内のファイル名を **sort** した並びで決まる。ゼロ埋めの
+連番を付けておくこと（`01_`, `02_`, ... `10_`）。`1_` のように桁を揃えないと
+`10_` が `2_` より前に来る。
+
+先頭だけ見たいなら `reel_host.sh next aoyagi`、キュー全体を見たいなら
+`reel_host.sh list aoyagi`。
 
 ## URL から投稿する
 
