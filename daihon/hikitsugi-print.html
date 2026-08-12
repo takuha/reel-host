@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>引き継ぎ｜青柳 バイト面接リール</title>
+<style>
+  @page { size: A4; margin: 13mm 12mm 11mm; }
+  :root{
+    --ink:#111a1f; --ink2:#33454e; --muted:#6b7c85;
+    --line:#b9c6cc; --line2:#dde5e8; --sunk:#f2f6f7;
+    --ai:#14556e; --buta:#a8323f; --dashi:#8a6a1f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; padding:0}
+  body{
+    font-family:"IPAexGothic","IPAGothic",sans-serif;
+    color:var(--ink); font-size:9.4pt; line-height:1.65;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  h1{font-size:17pt; margin:0 0 2mm; letter-spacing:.04em; line-height:1.35}
+  .sub{font-size:9pt; color:var(--muted); margin:0 0 4mm}
+  h2{font-size:11pt; margin:6mm 0 2.2mm; padding-bottom:1.2mm;
+     border-bottom:1.2pt solid var(--ai); color:var(--ai); letter-spacing:.05em}
+  h2:first-of-type{margin-top:4.5mm}
+  p{margin:0 0 2mm}
+  ul,ol{margin:0 0 2mm; padding-left:5mm}
+  li{margin-bottom:1mm}
+  b{font-weight:bold}
+  .lead{background:var(--sunk); border:.6pt solid var(--line2); padding:3mm 4mm; margin-bottom:3mm}
+  .lead p{margin:0}
+  table{width:100%; border-collapse:collapse; margin:0 0 3mm; font-size:8.6pt}
+  th,td{border:.6pt solid var(--line); padding:1.8mm 2.2mm; vertical-align:top; text-align:left}
+  th{background:var(--sunk); font-weight:bold; font-size:8.4pt; color:var(--ink2)}
+  tr{page-break-inside:avoid}
+  code{font-family:"IPAexGothic",monospace; font-size:8.4pt; background:var(--sunk);
+       border:.5pt solid var(--line2); padding:.3mm 1.4mm; color:var(--ink2); word-break:break-all}
+  .tel{background:var(--sunk); border:.6pt solid var(--line2); padding:3mm 4mm;
+       white-space:pre-wrap; font-size:8.8pt; line-height:1.8; margin-bottom:3mm;
+       font-family:"IPAexGothic",monospace}
+  .ask{border:.8pt solid var(--dashi); padding:3mm 4mm; margin:0 0 3mm; background:#fdf8ee}
+  .ask .ttl{color:var(--dashi); font-weight:bold; display:block; margin-bottom:1.5mm; font-size:10pt}
+  .ask ol{margin:0; padding-left:5mm}
+  .ask li{margin-bottom:1.5mm}
+  .keep{border:1pt solid var(--buta); border-left:3pt solid var(--buta);
+        padding:3mm 4mm; margin:0 0 3mm; background:#fdf4f5}
+  .keep .ttl{color:var(--buta); font-weight:bold; display:block; margin-bottom:1.5mm; font-size:10pt}
+  .keep ul{margin:0; padding-left:5mm}
+  .keep li{margin-bottom:1.3mm}
+  .note{color:var(--muted); font-size:8.6pt}
+  .avoid{page-break-inside:avoid}
+  footer{margin-top:4mm; padding-top:2mm; border-top:.6pt solid var(--line2);
+         color:var(--muted); font-size:8pt}
+</style>
+</head>
+<body>
+
+<h1>引き継ぎ｜青柳 バイト面接リール</h1>
+<p class="sub">あぐー豚しゃぶしゃぶ青柳／リール制作の引き継ぎ　—　2026-08-08</p>
+
+<div class="lead">
+  <p>台本は撮れる状態まで出来ている。<b>出演はこうちゃん1人（面接官＋応募者A〜Dの5役）</b>で確定したので、
+  人を集める必要はない。止まっているのは青柳さんにしか答えられない<b>2つだけ</b>で、撮影はまだ1カットも
+  撮っていない。</p>
+</div>
+
+<h2>いま何があるか</h2>
+<table class="avoid">
+  <thead><tr><th style="width:44mm">もの</th><th style="width:66mm">置き場</th><th>状態</th></tr></thead>
+  <tbody>
+    <tr><td>台本（A4・4ページ）</td><td><code>daihon/aoyagi_daihon.pdf</code></td><td>印刷して現場へ</td></tr>
+    <tr><td>台本（本体・更新はこちら）</td><td><code>daihon/aoyagi-shabushabu-baito-mensetsu.md</code></td><td>最新</td></tr>
+    <tr><td>投稿本文</td><td><code>daihon/caption.txt</code></td><td>応募フォームURL待ち</td></tr>
+    <tr><td>アイデアボックス（種6つ）</td><td><code>daihon/idea-box.md</code></td><td>最新</td></tr>
+    <tr><td>PDFの再生成元</td><td><code>daihon/daihon-print.html</code></td><td>最新</td></tr>
+  </tbody>
+</table>
+<p class="note">すべてブランチ <code>claude/aoyagi-shabu-script-lmhm2d</code>（PR #10）にある。</p>
+
+<h2>決まっていること</h2>
+<ul>
+  <li>店＝<b>あぐー豚しゃぶしゃぶ青柳</b>。<b>10月1日 大阪・心斎橋</b>オープン。店長＝<b>こうちゃん</b></li>
+  <li>着地先は<b>バイト募集導線</b>（応募フォーム → カレンダー予約 → 心斎橋事務所で面談）。
+      面接そのものが題材なので、募集告知に見えずに募集告知として働く</li>
+  <li><b>出演はこうちゃん1人で5役</b>（面接官＋応募者A〜D）。帽子・メガネ・上着の3点で応募者を分ける</li>
+  <li>尺は<b>60秒版と35秒版</b>の2つ。<b>1本目は35秒版</b>を出す。伸びたら60秒版（35秒版は着替えが1回減る）</li>
+  <li>元ネタは SUSURU（@susuru_tv）のバイト面接ネタ。<b>借りたのは構成だけ</b></li>
+</ul>
+
+<div class="ask">
+  <span class="ttl">止まっている2つ（青柳さんに聞く）</span>
+  <ol>
+    <li><b>〆は何か</b> — うどん／雑炊／ラーメン／蕎麦／〆なしのどれか。オチのセリフがまるごとここに
+        乗るので、決まらないと8番が撮れない。台本にパターン別のセリフが5つあるので選ぶだけ</li>
+    <li><b>応募フォームのURL</b>（と予約枠のURL）— 最後のCTAの着地先。プロフィールに置く</li>
+  </ol>
+  <p style="margin-top:2mm">司令塔の栓「青柳さんに4項目＋フォーム／予約URL2つ＋住所を確認する」と聞く相手が同じ。
+  まとめて1回で聞けば、この2つも一緒に埋まる。<b>出演者は探さなくていい</b>ので、こうちゃんの都合さえ
+  つけば、その日のうちに撮れる。</p>
+</div>
+
+<h2>引き継いだ人が順番にやること</h2>
+<ol>
+  <li>上の2つを青柳さんに確認する。ここが全部の前提</li>
+  <li>〆を1つ選んで、台本8番のDのセリフを確定させる（パターン表から選ぶだけ）</li>
+  <li>PDFを印刷して撮影。<b>台本順ではなく役ごと</b>に撮る（面接官を全部 → 差し出す手 →
+      応募者A→B→C→D → インサート → 音だけ）。着替えの回数がそのまま撮影時間になるので、
+      1つの役を着ているあいだに撮りきる</li>
+  <li>編集。カット尻0.2秒、正解テロップだけ0.5秒長く、BGMは8番頭で止めて9番で戻す</li>
+  <li><code>caption.txt</code> を確認して投稿</li>
+</ol>
+<div class="tel">./reel_post.sh check   aoyagi
+./reel_post.sh publish aoyagi ~/Movies/aoyagi_mensetsu.mp4 "$(cat daihon/caption.txt)"</div>
+<p class="note">トークンは60日で切れる。<code>check</code> で弾かれたら
+<code>./reel_post.sh refresh aoyagi</code>。投稿が通れば動画は自動で片付く
+（消し忘れも3日で <code>cleanup.sh</code> が拾う）。</p>
+
+<div class="keep">
+  <span class="ttl">変えないでほしいところ</span>
+  <ul>
+    <li><b>Q1の正解を牛の答えに戻さない。</b> 青柳はあぐー豚。豚は中心まで火を通しきる必要があり、
+        赤みが残ったものは出せない。「サッとくぐらせてピンクのまま」は牛の食べ方で、豚の店では
+        一発アウト。Q1はこの取り違えをネタにしている。逆に書くと店の信用に関わる</li>
+    <li><b>「しゃぶしゃぶ」はひらがな。</b> テロップもキャプションも揃える</li>
+    <li><b>元ネタは構成だけ借りる。</b> 映像も音源も使わない。相手のオリジナル音源も使えないので
+        BGMは自前で用意する</li>
+    <li><b>数字は盛らない。</b> 再生数も来客数も、測れていないものは出さない</li>
+    <li><b>1人5役の3つの決めごとを崩さない。</b> ①面接官と応募者を同じフレームに入れない
+        ②面接官は左で右を見る・応募者は右で左を見る（この向きを最後まで変えない）
+        ③面接官側は鍋が入る画、応募者側は椅子と壁だけ。どれか1つ崩れると会話に見えなくなる</li>
+  </ul>
+</div>
+
+<h2>ここまでの経緯</h2>
+<ul>
+  <li>元ネタのTikTokは本編を取得できなかったので、タイトルが示す構成（面接クイズ → 即不合格の反復
+      → 最後に採用）だけを借りて組み直した</li>
+  <li>最初の稿は<b>牛の前提</b>で書いていた。青柳があぐー豚の店だと分かった時点でQ1を反転し、
+      「牛の感覚で答えて落ちる」形に組み替えている</li>
+  <li>オープン日・エリア・CTAが確定したので、テロップとキャプションを開店告知とバイト募集に寄せた。
+      当初あった〈エリア〉の穴はもうない</li>
+  <li>出演をこうちゃん1人に変更した。応募者役を集める必要がなくなり、代わりに11番へ
+      「※面接官も応募者も、全部店長です」のオチを足している。段取りが減って、オチが1つ増えた</li>
+</ul>
+
+<h2>次に手が空いたら</h2>
+<p>しゃぶしゃぶ部の投稿セット5本が制作済みで投稿だけ残っている。新しく撮るより先に、そちらを出すほうが早い。</p>
+
+<footer>
+  台本本体：reel-host リポジトリ daihon/aoyagi-shabushabu-baito-mensetsu.md ／
+  台本PDF：daihon/aoyagi_daihon.pdf ／ ブランチ：claude/aoyagi-shabu-script-lmhm2d（PR #10）
+</footer>
+
+</body>
+</html>
