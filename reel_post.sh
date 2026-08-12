@@ -38,11 +38,17 @@ usage() {
   reel_post.sh post <account> <url> [caption] 公開済みURLの動画を投稿する
   reel_post.sh publish <account> <file|url> [caption]
                                               ホスティングから投稿まで一気にやる
+  reel_post.sh next <account> [caption]      キューの先頭を投稿して消す
 
 例:
   reel_post.sh check aoyagi
   reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "今日の一本"
   reel_post.sh publish aoyagi https://vt.tiktok.com/XXXXXXXX/ "今日の一本"
+  reel_post.sh next aoyagi "今日の一本"
+
+`next` は videos/<account>/ に既に置いてある（`reel_host.sh add` 済みの）動画から
+ファイル名順で先頭の1本を投稿する。投稿順を決めたいときは、ファイル名にゼロ埋めの
+連番を付けておく（01_, 02_, ...）。
 
 つながらないときは check から。エラーの原因がそのまま出る。
 EOS
@@ -329,6 +335,21 @@ cmd_publish() {
 	"$REPO_ROOT/reel_host.sh" clean "$account" "$(basename "$url")"
 }
 
+cmd_next() {
+	local account="${1:-}" caption="${2:-}"
+	[ -n "$account" ] || die 'アカウント名が指定されていない'
+
+	local name url
+	name="$("$REPO_ROOT/reel_host.sh" next "$account")"
+	[ -n "$name" ] || die "$account のキューに動画が無い（videos/$account/ に何も無い）"
+
+	url="$("$REPO_ROOT/reel_host.sh" url "$account" "$name")"
+	printf 'キュー先頭: %s\n' "$name" >&2
+
+	cmd_post "$account" "$url" "$caption"
+	"$REPO_ROOT/reel_host.sh" clean "$account" "$name"
+}
+
 main() {
 	local command="${1:-}"
 	[ $# -gt 0 ] && shift
@@ -339,6 +360,7 @@ main() {
 	refresh) cmd_refresh "$@" ;;
 	post) cmd_post "$@" ;;
 	publish) cmd_publish "$@" ;;
+	next) cmd_next "$@" ;;
 	'' | -h | --help | help) usage ;;
 	*) die "知らないコマンド: $command（reel_post.sh --help）" ;;
 	esac

@@ -31,11 +31,16 @@ usage() {
   reel_host.sh add <account> <video-file|url>  動画を公開して URL を出す
   reel_host.sh url <account> <name>            公開 URL を組み立てて出す
   reel_host.sh list [account]                  ホスティング中の動画を出す
+  reel_host.sh next <account>                  キューの先頭（ファイル名順）を出す
   reel_host.sh clean [account] [name]          投稿済み動画を消す（省略時は全アカウント）
 
 アカウントごとに videos/<account>/ に分けて置く。例:
   reel_host.sh add aoyagi ~/Movies/reel001.mp4
   reel_host.sh add aoyagi https://vt.tiktok.com/XXXXXXXX/
+
+投稿順を決めたいときは、ファイル名にゼロ埋めの連番を付けておく（01_, 02_, ...）。
+list や next はファイル名順（sort）で並ぶので、桁を揃えないと 10_ が 2_ より前に
+来てしまう。
 EOS
 }
 
@@ -140,6 +145,14 @@ cmd_list() {
 	find "$target" -type f -print | sed "s#^$REPO_ROOT/##" | sort
 }
 
+cmd_next() {
+	local account="${1:-}" target
+	validate_account "$account"
+	target="$REPO_ROOT/$VIDEO_DIR/$account"
+	[ -d "$target" ] || return 0
+	find "$target" -type f -print | sort | head -n1 | sed 's#.*/##'
+}
+
 cmd_clean() {
 	local account="${1:-}" name="${2:-}" target="$VIDEO_DIR"
 	if [ -n "$account" ]; then
@@ -177,6 +190,7 @@ main() {
 	add) cmd_add "$@" ;;
 	url) cmd_url "$@" ;;
 	list) cmd_list "$@" ;;
+	next) cmd_next "$@" ;;
 	clean) cmd_clean "$@" ;;
 	'' | -h | --help | help) usage ;;
 	*) die "知らないコマンド: $command（reel_host.sh --help）" ;;
