@@ -21,6 +21,13 @@ ENV_FILE="${REEL_ENV_FILE:-$REPO_ROOT/.env}"
 POLL_TRIES="${REEL_POLL_TRIES:-60}"
 POLL_INTERVAL="${REEL_POLL_INTERVAL:-5}"
 
+# Instagram の本文の上限。超えたぶんは切られるのではなく投稿ごと弾かれる。
+CAPTION_LIMIT="${REEL_CAPTION_LIMIT:-2200}"
+
+# --caption-file で渡された本文ファイル。resolve_caption が $CAPTION に展開する。
+CAPTION_FILE="${REEL_CAPTION_FILE:-}"
+CAPTION=""
+
 JQ="$(command -v jq || true)"
 PY="$(command -v python3 || true)"
 
@@ -40,15 +47,22 @@ usage() {
                                               ホスティングから投稿まで一気にやる
   reel_post.sh next <account> [caption]      キューの先頭を投稿して消す
 
+オプション:
+  -f, --caption-file <file>  本文をファイルから読む（引数での指定とは併用できない）
+
 例:
   reel_post.sh check aoyagi
   reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "今日の一本"
   reel_post.sh publish aoyagi https://vt.tiktok.com/XXXXXXXX/ "今日の一本"
   reel_post.sh next aoyagi "今日の一本"
+  reel_post.sh publish aoyagi ~/Movies/reel001.mp4 -f captions/doge-mining-payments.txt
 
 `next` は videos/<account>/ に既に置いてある（`reel_host.sh add` 済みの）動画から
 ファイル名順で先頭の1本を投稿する。投稿順を決めたいときは、ファイル名にゼロ埋めの
 連番を付けておく（01_, 02_, ...）。
+
+改行の多い長文はシェルの引用符で壊れやすい。captions/ にファイルで置いて
+--caption-file で渡すこと。
 
 つながらないときは check から。エラーの原因がそのまま出る。
 EOS
@@ -125,6 +139,46 @@ account_value() {
 		die "$var が .env に無い。reel_post.sh accounts で設定済みのアカウントを確認。"
 	fi
 	printf '%s' "$value"
+}
+
+# 本文の長さは「文字数」で数える必要がある。日本語はバイト数だと3倍に出るので、
+# ${#var} や wc -c では上限判定にならない。
+caption_length() {
+	local caption="$1"
+	if [ -n "$PY" ]; then
+		REEL_CAPTION="$caption" "$PY" -c 'import os; print(len(os.environ["REEL_CAPTION"]))'
+	elif [ -n "$JQ" ]; then
+		printf '%s' "$caption" | "$JQ" -Rs 'length'
+	fi
+}
+
+# 本文を確定して $CAPTION に入れる。引数で渡すか --caption-file で渡すかの
+# どちらか一方。値を返さないのは、この中の die をそのまま効かせるため
+# （コマンド置換の中だと exit がサブシェルで止まる）。
+resolve_caption() {
+	local caption="${1:-}" length
+
+	if [ -n "$CAPTION_FILE" ]; then
+		[ -z "$caption" ] || die '本文を引数と --caption-file の両方で渡している。どちらか一方にすること。'
+		[ -f "$CAPTION_FILE" ] || die "本文のファイルが見つからない: $CAPTION_FILE"
+		# 末尾の改行だけ落ちる。本文中の改行はそのまま Instagram の改行になる。
+		caption="$(cat "$CAPTION_FILE")"
+		[ -n "$caption" ] || die "本文のファイルが空: $CAPTION_FILE"
+	fi
+
+	if [ -n "$caption" ]; then
+		length="$(caption_length "$caption")"
+		case "$length" in
+		'' | *[!0-9]*) ;;
+		*)
+			if [ "$length" -gt "$CAPTION_LIMIT" ]; then
+				die "本文が $length 文字。Instagram の上限は $CAPTION_LIMIT 文字なので、このままでは投稿が弾かれる。"
+			fi
+			;;
+		esac
+	fi
+
+	CAPTION="$caption"
 }
 
 graph_get() {
@@ -278,11 +332,18 @@ wait_for_container() {
 }
 
 cmd_post() {
-	local account="${1:-}" video_url="${2:-}" caption="${3:-}"
+	local account="${1:-}" video_url="${2:-}"
 	[ -n "$account" ] || die 'アカウント名が指定されていない'
 	[ -n "$video_url" ] || die '動画URLが指定されていない'
 	require_tools
+	resolve_caption "${3:-}"
 	load_env
+
+	do_post "$account" "$video_url" "$CAPTION"
+}
+
+do_post() {
+	local account="$1" video_url="$2" caption="$3"
 
 	local id token body container media_id
 	id="$(account_value "$account" IG_USER_ID)"
@@ -320,6 +381,11 @@ cmd_publish() {
 	local account="${1:-}" source="${2:-}" caption="${3:-}"
 	[ -n "$account" ] || die 'アカウント名が指定されていない'
 	[ -n "$source" ] || die '動画ファイルか動画URLが指定されていない'
+	require_tools
+	# 本文の不備はホスティングの前に落とす。上げてから落ちると、投稿していない
+	# 動画がリポジトリに残ったままになる。
+	resolve_caption "${3:-}"
+	load_env
 
 	# 手元のファイルでも共有URLでも add がそのまま受ける。URL のときは add が
 	# 落としてから載せる。Graph API に渡せるのは自分で公開したURLだけなので、
@@ -328,7 +394,7 @@ cmd_publish() {
 	url="$("$REPO_ROOT/reel_host.sh" add "$account" "$source")"
 	printf '公開URL: %s\n' "$url" >&2
 
-	cmd_post "$account" "$url" "$caption"
+	do_post "$account" "$url" "$CAPTION"
 
 	# 投稿が通った分だけ消す。まだ投稿していない動画は残す。公開URLの末尾が
 	# そのままホスティング中のファイル名なので、元がURLでも名前を特定できる。
@@ -351,8 +417,32 @@ cmd_next() {
 }
 
 main() {
-	local command="${1:-}"
-	[ $# -gt 0 ] && shift
+	local command
+	local -a rest
+	rest=()
+
+	# オプションはどの位置に置いてもいいように、先に抜き出してから位置引数に戻す。
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		-f | --caption-file)
+			[ $# -ge 2 ] || die '--caption-file にファイルが指定されていない'
+			CAPTION_FILE="$2"
+			shift 2
+			;;
+		--caption-file=*)
+			CAPTION_FILE="${1#--caption-file=}"
+			shift
+			;;
+		*)
+			rest[${#rest[@]}]="$1"
+			shift
+			;;
+		esac
+	done
+	set -- ${rest[@]+"${rest[@]}"}
+
+	command="${1:-}"
+	if [ $# -gt 0 ]; then shift; fi
 
 	case "$command" in
 	accounts) cmd_accounts "$@" ;;

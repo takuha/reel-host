@@ -77,6 +77,8 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 ./reel_post.sh refresh aoyagi                             # トークンを60日に延長
 ./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "本文" # 公開→投稿→後片付け
 ./reel_post.sh next aoyagi "本文"                          # キューの先頭を投稿→後片付け
+./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 \
+  -f captions/doge-mining-payments.txt                  # 本文をファイルから渡す
 ```
 
 `publish` は「ホスティング → 投稿 → 投稿できた分だけ削除」までやる。まだ投稿して
@@ -225,6 +227,31 @@ $ ./reel_dm.sh check aoyagi
 `instagram_manage_messages` と `instagram_manage_comments` にチェックを入れて生成し、
 `.env` に書いて `./reel_post.sh refresh aoyagi` で60日に延長する。
 
+## 本文
+
+改行の多い長文をシェルの引数に載せると、引用符やバッククォートで壊れる。本文は
+`captions/` にファイルで置いて `--caption-file`（`-f`）で渡す。
+
+```sh
+./reel_post.sh publish takuha ~/Movies/reel001.mp4 -f captions/doge-mining-payments.txt
+```
+
+- ファイル中の改行はそのまま Instagram の改行になる。末尾の改行だけ落ちる。
+- 引数での指定と `--caption-file` は併用できない。両方あるとエラーで止まる。
+- Instagram の本文は **2200文字** が上限。超えたぶんが切られるのではなく投稿ごと
+  弾かれるので、投稿前に文字数を見て落とす。日本語はバイト数だと3倍に出るため、
+  数えているのは文字数。
+- `publish` は本文を確かめてからホスティングする。上げてから落ちると、投稿して
+  いない動画がリポジトリに残ってしまうため。
+
+数字や固有名詞を出す本文には、同じ名前で `.sources.md` を並べて出典を残す。使い回すとき
+に盛り直して事故らないための記録なので、**本文を直したら出典も直す**。
+
+| ファイル | 内容 |
+| --- | --- |
+| `captions/doge-mining-payments.txt` | DOGE マイニングと決済（W杯決勝の話から入る） |
+| `captions/doge-mining-payments.sources.md` | 上の出典と、書き換えるときの注意 |
+
 ## 消し忘れの保険
 
 `clean` を打ち忘れた分は `cleanup.sh` が拾う。コミットから3日以上経った動画を削除して
@@ -292,6 +319,8 @@ videos/aoyagi/reel001.mp4
 | `REEL_ENV_FILE` | `./.env` | 設定ファイルの場所 |
 | `REEL_FETCH_COOKIES` | なし | URL取得に使う Cookie ファイル（Netscape 形式） |
 | `REEL_FETCH_COOKIES_FROM_BROWSER` | なし | Cookie をブラウザから直接読む（`chrome` など） |
+| `REEL_CAPTION_FILE` | （なし） | `--caption-file` の既定値 |
+| `REEL_CAPTION_LIMIT` | `2200` | 本文の上限文字数。Meta 側が変えたら上げる |
 
 `REEL_GRAPH_VERSION` はバージョン切れを言われたら上げる。既定値が現時点の最新とは
 限らないので、エラーが出たら Meta の changelog で確認すること。
