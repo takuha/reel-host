@@ -227,6 +227,46 @@ $ ./reel_dm.sh check aoyagi
 `instagram_manage_messages` と `instagram_manage_comments` にチェックを入れて生成し、
 `.env` に書いて `./reel_post.sh refresh aoyagi` で60日に延長する。
 
+## コメントに返信する
+
+DM（上）とは別に、コメント欄への**公開返信**は `reel_comment.sh` を使う。
+WAKU のアカウントはこちらで回す（返信の文体は `.claude/skills/waku-reply/`）。
+
+```sh
+./reel_comment.sh check waku          # 返信できる状態か確かめる
+./reel_comment.sh new   waku          # 直近10投稿の未返信コメントを出す
+./reel_comment.sh reply waku <comment-id> "ほんまありがとう、また聞いてや"
+```
+
+`new` は「自分のコメント」と「既に自分の返信が付いているコメント」を除いて出すので、
+毎日そのまま打っても同じコメントに二度返さない。判定は API 側（返信スレッドの中身）で
+やっていて、ローカルの台帳（`.comment_replied/`、`.gitignore` 済み）は保険。
+
+必要な権限は `instagram_manage_comments`。DM 用の `instagram_manage_messages` は要らない。
+
+### いいねは手動
+
+**コメントへの「いいね」は Graph API に endpoint が無い。** 自動では押せないので、
+返信を送ったらアプリを開いて手動で押す。毎朝の Routine（下）は返信したコメントの
+一覧を通知で寄こすので、それを見ながら押せばいい。
+
+同じ理由で「投稿にいいねした人の一覧」も取れない（`like_count` という数だけ）。
+いいねが来ても誰からかは API では分からないので、反応できるのはコメントだけ。
+
+### WAKU の自動実行
+
+cleanup.sh と同じく Claude Code の Routine（名前: **WAKU コメント返し**、毎朝9時 JST）で
+回している。リポジトリの中を探しても仕組みは無い。未返信コメントを `new` で拾い、
+`waku-reply` スキルの文体（関西弁の一言）で1件ずつ返信し、いいねする分の一覧を
+通知してくる。
+
+クラウド実行なので、動くには環境側に2つ要る（どちらも Claude Code の環境設定）。
+
+1. ネットワークポリシーで `graph.facebook.com` を許可する
+2. 環境変数に `WAKU_IG_USER_ID` と `WAKU_ACCESS_TOKEN` を入れる（`.env` はクラウドに無い）
+
+どちらかが欠けていると、Routine は返信せず「何が足りないか」だけ報告してくる。
+
 ## 本文
 
 改行の多い長文をシェルの引数に載せると、引用符やバッククォートで壊れる。本文は

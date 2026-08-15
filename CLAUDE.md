@@ -11,6 +11,7 @@ Instagram リールを投稿するための一式。Meta Graph API が動画を�
 | --- | --- |
 | `reel_host.sh` | 動画を GitHub Pages に載せて公開URLを出す／消す |
 | `reel_post.sh` | その URL を Graph API に渡して投稿する。`check` `refresh` もここ |
+| `reel_comment.sh` | 投稿に来たコメントに公開返信する。WAKU はこれ |
 | `cleanup.sh` | 消し忘れた動画を時間経過で回収する保険 |
 
 アカウントは `.env` の接頭辞で決まる（`AOYAGI_` → `aoyagi`）。増やすときは2行足すだけで、
@@ -29,6 +30,15 @@ README の「毎朝9時に自動実行される」は正しい。ただし**仕�
 
 **`.github/workflows/cleanup.yml` を追加してはいけない。** 二重に走る。
 
+WAKU のコメント返しも同じく Routine で回っている。
+
+| 項目 | 値 |
+| --- | --- |
+| 名前 | WAKU コメント返し |
+| cron | `0 0 * * *`（UTC）= 毎朝9時 JST |
+| 内容 | `reel_comment.sh new waku` → 未返信に関西弁の一言で返信（文体は `waku-reply` スキル）→ いいねする分を通知 |
+| 前提 | 環境側で `graph.facebook.com` の許可と `WAKU_IG_USER_ID` / `WAKU_ACCESS_TOKEN` の環境変数。欠けていると報告だけして終わる |
+
 自動実行の有無を調べるときは、`crontab` と Actions だけでなく **Routine の一覧も見ること**
 （`list_triggers`）。ここを見落とすと「保険が掛かっていない」と誤診する。
 
@@ -46,6 +56,12 @@ README の「毎朝9時に自動実行される」は正しい。ただし**仕�
 
 LFS も `.gitattributes` も履歴の書き換えも、今入れる理由がない。
 **`du -sh .git` が 500 MB を超えたら**置き場の変更（orphan ブランチ／R2・S3 等）を検討する。
+
+### いいねの自動化はできない — API に endpoint が無い
+
+コメントへの「いいね」も「投稿にいいねした人の一覧」も Graph API に存在しない。
+実装を探しても無駄。いいねはアプリから手動で押す運用（Routine が返信済みコメントの
+一覧を通知するので、それを見て押す）。
 
 ### テスト・CI は入れない
 
