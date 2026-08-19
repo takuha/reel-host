@@ -346,3 +346,8 @@ MCP は環境変数を読む。使う前にシェルへ入れておく（`.env` 
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...   # GitHub MCP に必要
 export CONTEXT7_API_KEY=...                   # 無くても動く。入れるとレート制限が緩む
 ```
+
+## コンサル素材
+
+投稿する中身のほう（講義スライド・リールの台本）は [`docs/consulting/`](docs/consulting/)
+に置いてある。スクリプトとは独立していて、こちらを消しても投稿処理には影響しない。
