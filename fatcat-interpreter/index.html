@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fat Cat 通訳 - 日本語 ⇔ Español</title>
+<style>
+  :root {
+    --bg: #12161a;
+    --panel: #1b2127;
+    --panel-active: #223028;
+    --accent: #4fd1a5;
+    --accent2: #ffb56b;
+    --text: #eef2f0;
+    --sub: #93a19b;
+    --border: #2a3238;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; letter-spacing: .02em; }
+  header p { margin: 0; color: var(--sub); font-size: .85rem; }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 900px;
+  }
+  @media (max-width: 640px) {
+    .cards { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+    transition: background .2s, border-color .2s;
+  }
+  .card.listening {
+    background: var(--panel-active);
+    border-color: var(--accent);
+  }
+  .card h2 {
+    font-size: .95rem;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--sub);
+    font-weight: 600;
+  }
+  .flag { font-size: 1.1rem; }
+  .transcript {
+    flex: 1;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    min-height: 60px;
+  }
+  .transcript.placeholder { color: var(--sub); }
+  .translated {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--accent2);
+    min-height: 30px;
+  }
+  .mic-btn {
+    margin-top: 14px;
+    align-self: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #0a1410;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 0 0 0 rgba(79,209,165,.5);
+  }
+  .mic-btn.active {
+    background: #ff6b6b;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,107,107,.5); }
+    70% { box-shadow: 0 0 0 14px rgba(255,107,107,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+  }
+  .status {
+    margin-top: 20px;
+    font-size: .8rem;
+    color: var(--sub);
+    text-align: center;
+    max-width: 640px;
+    line-height: 1.6;
+  }
+  .status.error { color: #ff6b6b; }
+  .toggle-row {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: .82rem;
+    color: var(--sub);
+  }
+  .toggle-row input { transform: scale(1.1); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐱 Fat Cat 通訳</h1>
+  <p>日本語 ⇔ Español をリアルタイムで文字に起こして翻訳します</p>
+</header>
+
+<div class="cards">
+  <div class="card" id="card-ja">
+    <h2><span><span class="flag">🇯🇵</span> 日本語</span><span id="state-ja">待機中</span></h2>
+    <div class="transcript placeholder" id="transcript-ja">ここに話した内容が表示されます</div>
+    <div class="translated" id="translated-ja"></div>
+    <button class="mic-btn" id="mic-ja" title="日本語で話す">🎤</button>
+  </div>
+
+  <div class="card" id="card-es">
+    <h2><span><span class="flag">🇬🇹</span> Español</span><span id="state-es">Esperando</span></h2>
+    <div class="transcript placeholder" id="transcript-es">Aquí aparecerá lo que digas</div>
+    <div class="translated" id="translated-es"></div>
+    <button class="mic-btn" id="mic-es" title="Habla en español">🎤</button>
+  </div>
+</div>
+
+<div class="toggle-row">
+  <label><input type="checkbox" id="auto-speak" checked> 翻訳を自動で読み上げる / Leer traducción en voz alta</label>
+</div>
+
+<div class="status" id="status">
+  マイクのボタンを押して話してください。対応ブラウザは Chrome / Edge です（Safari は音声認識非対応）。<br>
+  翻訳には無料の MyMemory API を使っています。精度は簡易的なので、正確さが必要な場面には向きません。
+</div>
+
+<script>
+const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const LANGS = {
+  ja: { code: 'ja-JP', pair: 'ja|es', otherKey: 'es', voiceLang: 'ja-JP' },
+  es: { code: 'es-ES', pair: 'es|ja', otherKey: 'ja', voiceLang: 'es-ES' },
+};
+
+const el = (id) => document.getElementById(id);
+const statusEl = el('status');
+const autoSpeak = el('auto-speak');
+
+let activeRecognition = null;
+let activeKey = null;
+
+function setStatus(msg, isError) {
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('error', !!isError);
+}
+
+async function translate(text, pair) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('翻訳APIエラー');
+  const data = await res.json();
+  return data?.responseData?.translatedText || '';
+}
+
+function speak(text, lang) {
+  if (!autoSpeak.checked || !text) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  window.speechSynthesis.speak(utter);
+}
+
+function buildRecognizer(key) {
+  const cfg = LANGS[key];
+  const rec = new SpeechRecognitionImpl();
+  rec.lang = cfg.code;
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  const card = el(`card-${key}`);
+  const micBtn = el(`mic-${key}`);
+  const transcriptEl = el(`transcript-${key}`);
+  const translatedEl = el(`translated-${key}`);
+  const stateEl = el(`state-${key}`);
+
+  rec.onstart = () => {
+    card.classList.add('listening');
+    micBtn.classList.add('active');
+    stateEl.textContent = key === 'ja' ? '聞き取り中…' : 'Escuchando…';
+    transcriptEl.classList.remove('placeholder');
+    setStatus('');
+  };
+
+  rec.onresult = (event) => {
+    let finalText = '';
+    let interimText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const chunk = event.results[i];
+      if (chunk.isFinal) finalText += chunk[0].transcript;
+      else interimText += chunk[0].transcript;
+    }
+    transcriptEl.textContent = finalText || interimText;
+
+    if (finalText.trim()) {
+      const other = LANGS[cfg.otherKey];
+      translatedEl.textContent = key === 'ja' ? '翻訳中…' : 'Traduciendo…';
+      translate(finalText.trim(), cfg.pair)
+        .then((translated) => {
+          translatedEl.textContent = translated;
+          speak(translated, other.voiceLang);
+        })
+        .catch((err) => {
+          translatedEl.textContent = '';
+          setStatus('翻訳に失敗しました: ' + err.message, true);
+        });
+    }
+  };
+
+  rec.onerror = (event) => {
+    setStatus('音声認識エラー: ' + event.error, true);
+  };
+
+  rec.onend = () => {
+    card.classList.remove('listening');
+    micBtn.classList.remove('active');
+    stateEl.textContent = key === 'ja' ? '待機中' : 'Esperando';
+    if (activeKey === key) activeKey = null;
+  };
+
+  return rec;
+}
+
+function setupMic(key) {
+  const micBtn = el(`mic-${key}`);
+  const recognizer = buildRecognizer(key);
+
+  micBtn.addEventListener('click', () => {
+    if (activeKey === key) {
+      recognizer.stop();
+      return;
+    }
+    if (activeRecognition) {
+      activeRecognition.stop();
+    }
+    activeKey = key;
+    activeRecognition = recognizer;
+    try {
+      recognizer.start();
+    } catch (err) {
+      setStatus('マイクを開始できませんでした: ' + err.message, true);
+    }
+  });
+}
+
+if (!SpeechRecognitionImpl) {
+  setStatus('このブラウザは音声認識に対応していません。Chrome または Edge で開いてください。', true);
+  el('mic-ja').disabled = true;
+  el('mic-es').disabled = true;
+} else {
+  setupMic('ja');
+  setupMic('es');
+}
+</script>
+
+</body>
+</html>
