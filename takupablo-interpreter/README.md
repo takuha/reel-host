@@ -1,4 +1,4 @@
-# Fat Cat 通訳（プロトタイプ）
+# タクパブロ 通訳（プロトタイプ）
 
 日本語 ⇔ Español をブラウザだけでリアルタイム翻訳する、単一HTMLアプリ。
 Zoom統合・3Dアバターの前段階として、まず「マイクの声を拾って画面に翻訳を出す」部分だけを作ったもの。
@@ -12,7 +12,7 @@ Zoom統合・3Dアバターの前段階として、まず「マイクの声を�
 ローカルで確認する場合:
 
 ```bash
-cd fatcat-interpreter
+cd takupablo-interpreter
 python3 -m http.server 8000
 # ブラウザで http://localhost:8000 を開く
 ```
