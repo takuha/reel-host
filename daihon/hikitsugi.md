@@ -12,11 +12,12 @@
 | --- | --- | --- |
 | 台本（A4・4ページ） | `daihon/aoyagi_daihon.pdf` | 印刷して現場へ |
 | 台本（本体・更新はこちら） | `daihon/aoyagi-shabushabu-baito-mensetsu.md` | 最新 |
-| 投稿本文 | `daihon/caption.txt` | 応募フォームURL待ち |
+| 投稿本文 | `daihon/caption.txt` | 完成。締めは「応募」コメント誘導 |
+| DM の文面と送り方 | `daihon/dm_aoyagi.md` | 応募フォームURL待ち |
 | アイデアボックス（種6つ） | `daihon/idea-box.md` | 最新 |
 | PDFの再生成元 | `daihon/daihon-print.html` | 最新 |
 
-すべてブランチ `claude/aoyagi-shabu-script-lmhm2d`（PR #10）にある。
+台本一式は main にマージ済み（PR #10。ブランチ `claude/aoyagi-shabu-script-lmhm2d` は消えている）。
 
 ## 決まっていること
 
@@ -31,7 +32,7 @@
 
 1. **〆は何か** — うどん／雑炊／ラーメン／蕎麦／〆なしのどれか。オチのセリフがまるごとここに
    乗るので、決まらないと8番が撮れない。台本にパターン別のセリフが5つあるので選ぶだけ
-2. **応募フォームのURL**（と予約枠のURL）— 最後のCTAの着地先。プロフィールに置く
+2. **応募フォームのURL**（と予約枠のURL）— DM で送るリンクの着地先。プロフィールにも置く
 
 司令塔の栓「青柳さんに4項目＋フォーム／予約URL2つ＋住所を確認する」と聞く相手が同じ。
 まとめて1回で聞けば、この2つも一緒に埋まる。
@@ -52,6 +53,10 @@
 ./reel_post.sh check   aoyagi
 ./reel_post.sh publish aoyagi ~/Movies/aoyagi_mensetsu.mp4 "$(cat daihon/caption.txt)"
 ```
+
+6. 「応募」とコメントした人に応募フォームを DM で送る。文面と手順は
+   `daihon/dm_aoyagi.md`。コメントから7日で送れなくなるので、投稿後は
+   1日1回 `sweep` を回す
 
 トークンは60日で切れる。`check` で弾かれたら `./reel_post.sh refresh aoyagi`。投稿が通れば
 動画は自動で片付く（消し忘れも3日で `cleanup.sh` が拾う）。
