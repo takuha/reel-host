@@ -91,13 +91,15 @@
 
 ### 製作メモ
 
-- **1本目のロゴ確定（2026-08-23）**：`daihon/design/maruchan_logo_v2.png`。
-  Midjourneyで黒×金の手描き風リング（禅の円相のような筆致）を生成し、文字は
-  MidjourneyがAI生成すると崩れるため**PILで別工程として焼き込み**（ヒラギノ丸ゴ、
-  「マル」）。MJ原本は `daihon/design/maruchan_badge_mj_raw.png` に残してあるので、
-  色・文字だけの再加工がいつでも可能。生成スクリプトは
-  `daihon/design/gen_maruchan_logo_v2.py`
-- 配置確認用モック：`daihon/design/maruchan_shirt_mockup_v2.png`（胸元、透過処理済み）
+- **1本目のロゴ確定（2026-08-24・v3）**：`daihon/design/maruchan_logo_v3.png`。
+  v1（PIL単体）・v2（Midjourneyの手描き風リング）は**「手描き感がキャラに合わない」
+  というフィードバックで不採用**。v3はMidjourneyでフラットな同心円リング
+  （精密なベクター調、手描き・ブラシ感なし）を生成し、文字はPILで別工程として焼き込み
+  （ヒラギノ丸ゴ、「マル」）。MJ原本は `daihon/design/maruchan_badge3_mj_raw.png`。
+  生成スクリプトは `daihon/design/gen_maruchan_logo_v3.py`
+- 配置確認用モック：`daihon/design/maruchan_shirt_mockup_v3.png`（胸元、丸マスクで
+  ワッペン状に配置）
+- v1/v2一式は履歴として `daihon/design/` に残置（不採用・削除はしていない）
 - ロゴ合成はPILで静止画オーバーレイを作り、シャツの位置に貼り込む方式（`ffmpeg` に
   `drawtext` が無い制約と同じ理由で、テキストや図形は必ずPNG化してから乗せる）。
   シャツが動く映像にどう追従させるかは、実際に撮った素材を見てから検討する
