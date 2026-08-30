@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Threads OAuth code</title>
+</head>
+<body style="font-family:sans-serif;padding:2rem;word-break:break-all;">
+<h1>Threads OAuth redirect</h1>
+<p>この画面に出た <code>code</code> の値をコピーして戻ってください。</p>
+<pre id="out" style="background:#eee;padding:1rem;font-size:1.1rem;"></pre>
+<script>
+document.getElementById('out').textContent = location.search || '(パラメータなし)';
+</script>
+</body>
+</html>
