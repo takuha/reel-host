@@ -27,6 +27,17 @@ AOYAGI_IG_USER_ID=17841400000000000
 AOYAGI_ACCESS_TOKEN=EAAG...
 ```
 
+### 現在のアカウント
+
+`.env.example` に用意済みの接頭辞は次の3つ。増やすときは同じ形で2行足すだけで、
+スクリプト側の変更は要らない。
+
+| 接頭辞 | アカウント名（`reel_post.sh` / `reel_host.sh` に渡す名前） |
+| --- | --- |
+| `TAKUHA_` | `takuha` |
+| `AOYAGI_` | `aoyagi` |
+| `MARUCHAN_` | `maruchan` |
+
 ### トークンと IG ユーザー ID の取り方
 
 アカウントを1つ増やすたびに、この手順を通す必要がある。**トークンは認可したアカウント
