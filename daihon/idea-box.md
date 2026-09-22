@@ -39,7 +39,7 @@
 借りたのは構成だけで、映像・音源は使わない。オリジナル音源も使えないのでBGMは別で用意する。
 
 **置き場** — `daihon/aoyagi-shabushabu-baito-mensetsu.md`（構成表・撮影香盤・テロップ・編集メモ）、
-`daihon/caption.txt`（投稿本文）
+`daihon/caption.txt`（投稿本文）、`daihon/aoyagi-bgm-okinawa.md`（BGM候補）
 
 **出すために埋まっていないもの**
 
