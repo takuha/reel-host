@@ -107,6 +107,19 @@ Facebook ログイン方式では `META_APP_ID` と `META_APP_SECRET` が必要�
 `add` は GitHub Pages が実際に配信を始めるまで待ってから URL を出す。プッシュ直後は
 まだ 404 で、待たずに Graph API へ渡すと動画取得に失敗するため。
 
+## 位置情報タグ（住所）を付ける
+
+`.env` に `<PREFIX>_LOCATION_ID` を入れておくと、そのアカウントの投稿に位置情報タグが
+付く。値は**住所が入った Facebook ページの ID**。何を入れればいいかは `location` で出る。
+
+```sh
+./reel_post.sh location aoyagi                                   # 使えるページIDと住所を出す
+./reel_post.sh publish aoyagi ~/Movies/reel001.mp4 "本文" --location 1234567890   # 1本だけ上書き
+```
+
+プロフィールの住所は API では変えられないのでアプリで入れる。青柳の手順は
+[`docs/aoyagi/address.md`](docs/aoyagi/address.md)。
+
 ## 投稿順を決めて溜めておく
 
 複数本を先に `add` だけしておいて、決めた順に1本ずつ投稿したいときは `next` を使う。

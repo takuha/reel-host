@@ -28,6 +28,10 @@ CAPTION_LIMIT="${REEL_CAPTION_LIMIT:-2200}"
 CAPTION_FILE="${REEL_CAPTION_FILE:-}"
 CAPTION=""
 
+# 位置情報タグ（住所）。Facebook ページの ID を渡す。--location が無ければ
+# .env の <PREFIX>_LOCATION_ID を使い、それも無ければタグなしで投稿する。
+LOCATION_ID="${REEL_LOCATION_ID:-}"
+
 JQ="$(command -v jq || true)"
 PY="$(command -v python3 || true)"
 
@@ -46,9 +50,11 @@ usage() {
   reel_post.sh publish <account> <file|url> [caption]
                                               ホスティングから投稿まで一気にやる
   reel_post.sh next <account> [caption]      キューの先頭を投稿して消す
+  reel_post.sh location <account>             位置情報タグに使えるページIDを出す
 
 オプション:
   -f, --caption-file <file>  本文をファイルから読む（引数での指定とは併用できない）
+  -l, --location <page-id>   位置情報タグを付ける（既定は .env の <PREFIX>_LOCATION_ID）
 
 例:
   reel_post.sh check aoyagi
@@ -139,6 +145,18 @@ account_value() {
 		die "$var が .env に無い。reel_post.sh accounts で設定済みのアカウントを確認。"
 	fi
 	printf '%s' "$value"
+}
+
+# 位置情報タグのページID。--location が優先で、無ければ .env の値。どちらも
+# 無いのは正常（タグなしで投稿する）なので、account_value と違って止めない。
+account_location() {
+	local var
+	if [ -n "$LOCATION_ID" ]; then
+		printf '%s' "$LOCATION_ID"
+		return 0
+	fi
+	var="$(account_prefix "$1")_LOCATION_ID"
+	printf '%s' "${!var-}"
 }
 
 # 本文の長さは「文字数」で数える必要がある。日本語はバイト数だと3倍に出るので、
@@ -307,6 +325,37 @@ cmd_check() {
 	exit 1
 }
 
+# 位置情報タグに渡せるのは「住所が入った Facebook ページ」の ID。場所の検索は
+# 特別な審査が要るので、ここではトークンで見えるページ（＝連携中の自分の店の
+# ページ）から住所の有無を出す。住所が空のページを渡すと投稿時に弾かれる。
+cmd_location() {
+	local account="${1:-}"
+	[ -n "$account" ] || die 'アカウント名が指定されていない'
+	require_tools
+	load_env
+
+	local token body current
+	token="$(account_value "$account" ACCESS_TOKEN)"
+	body="$(graph_get me/accounts \
+		--data-urlencode "fields=id,name,location,instagram_business_account{username}" \
+		--data-urlencode "access_token=$token")"
+	fail_on_error "$body" 'ページ一覧の取得'
+
+	if [ -n "$JQ" ]; then
+		printf '%s' "$body" | "$JQ" -r '
+			.data[]? |
+			"\(.id)  \(.name)  @\(.instagram_business_account.username // "IG未連携")\n    住所: " +
+			(if .location.street then
+				"\(.location.zip // "") \(.location.state // "")\(.location.city // "")\(.location.street)"
+			 else "未設定（このページIDは位置情報タグに使えない）" end)'
+	else
+		printf '%s\n' "$body"
+	fi
+
+	current="$(account_location "$account")"
+	printf '\n現在の %s_LOCATION_ID: %s\n' "$(account_prefix "$account")" "${current:-（未設定・タグなしで投稿する）}"
+}
+
 # コンテナが FINISHED になるまで待つ。ERROR なら理由を出して止める。
 wait_for_container() {
 	local container="$1" token="$2" i body status detail
@@ -345,9 +394,10 @@ cmd_post() {
 do_post() {
 	local account="$1" video_url="$2" caption="$3"
 
-	local id token body container media_id
+	local id token body container media_id location
 	id="$(account_value "$account" IG_USER_ID)"
 	token="$(account_value "$account" ACCESS_TOKEN)"
+	location="$(account_location "$account")"
 
 	printf 'コンテナ作成中...\n' >&2
 	local args=(
@@ -357,6 +407,10 @@ do_post() {
 	)
 	if [ -n "$caption" ]; then
 		args+=(--data-urlencode "caption=$caption")
+	fi
+	if [ -n "$location" ]; then
+		printf '位置情報タグ: %s\n' "$location" >&2
+		args+=(--data-urlencode "location_id=$location")
 	fi
 
 	body="$(graph_post "$id/media" "${args[@]}")"
@@ -433,6 +487,15 @@ main() {
 			CAPTION_FILE="${1#--caption-file=}"
 			shift
 			;;
+		-l | --location)
+			[ $# -ge 2 ] || die '--location にページIDが指定されていない'
+			LOCATION_ID="$2"
+			shift 2
+			;;
+		--location=*)
+			LOCATION_ID="${1#--location=}"
+			shift
+			;;
 		*)
 			rest[${#rest[@]}]="$1"
 			shift
@@ -451,6 +514,7 @@ main() {
 	post) cmd_post "$@" ;;
 	publish) cmd_publish "$@" ;;
 	next) cmd_next "$@" ;;
+	location) cmd_location "$@" ;;
 	'' | -h | --help | help) usage ;;
 	*) die "知らないコマンド: $command（reel_post.sh --help）" ;;
 	esac
