@@ -119,6 +119,12 @@ h1{font-size:30px;font-weight:800;margin-top:4px;letter-spacing:.12em}
 .hints[open] summary::before{content:"－ "}
 .hints .hint-lead{font-size:12px;color:var(--sub);margin-top:6px}
 .hints ol{margin:6px 0 0 1.4em;font-size:13px;line-height:1.9}
+#surveyForm .q{font-size:13px;font-weight:700;margin-top:12px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#surveyForm .chip{display:inline-block;margin-top:0;line-height:1}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:8px 12px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;font-family:"Hiragino Sans",sans-serif}
+.chip input:checked+span{border-color:var(--gold);background:rgba(201,163,90,.22);color:var(--gold-l);font-weight:700}
 #surveyForm label{display:block;font-size:13px;font-weight:700;margin-top:12px;line-height:1.6}
 #surveyForm textarea{display:block;width:100%;margin-top:6px;padding:10px;border-radius:4px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);font-size:16px;font-family:inherit;resize:vertical}
 .survey-send{display:block;width:100%;margin-top:14px;padding:12px;border-radius:4px;border:1px solid var(--gold);background:transparent;color:var(--gold-l);font-weight:700;font-size:15px;letter-spacing:.2em;font-family:inherit;cursor:pointer}
@@ -191,9 +197,9 @@ footer{margin-top:28px;text-align:center;font-size:11px;color:var(--sub);line-he
       <h2>お店へのアンケート</h2>
       <p>よければ、今日のご感想を聞かせてください。お答えはお店だけが読み、メニューや接客をよくするために使います。口コミとして公開されることはありません。</p>
       <form id="surveyForm">
-        <label>いちばん印象に残った料理は何でしたか？<textarea name="entry.2068002687" rows="2"></textarea></label>
-        <label>あぐー豚を食べてみて、どうでしたか？<textarea name="entry.453504556" rows="2"></textarea></label>
-        <label>どんな人にすすめたいですか？<textarea name="entry.1868107299" rows="2"></textarea></label>
+        <div class="q">青柳を何で知りましたか？<div class="chips"><label class="chip"><input type="radio" name="entry.2068002687" value="Instagram"><span>Instagram</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="食べログ"><span>食べログ</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="Googleマップ"><span>Googleマップ</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="知人の紹介"><span>知人の紹介</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="通りがかり"><span>通りがかり</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="その他"><span>その他</span></label></div></div>
+        <label>「もっとこうだったら」と思ったことはありますか？<textarea name="entry.453504556" rows="2"></textarea></label>
+        <div class="q">また来たいと思いますか？<div class="chips"><label class="chip"><input type="radio" name="entry.1868107299" value="ぜひ"><span>ぜひ</span></label><label class="chip"><input type="radio" name="entry.1868107299" value="たぶん"><span>たぶん</span></label><label class="chip"><input type="radio" name="entry.1868107299" value="わからない"><span>わからない</span></label></div></div>
         <button type="submit" class="survey-send">送る</button>
       </form>
       <p class="survey-done" id="surveyDone">ありがとうございました。いただいた声は、お店のみんなで読みます。</p>
@@ -356,8 +362,9 @@ var SND={bgm:'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjE
   sf.addEventListener('submit',function(e){
     e.preventDefault();
     var fd=new URLSearchParams(), any=false;
-    [].forEach.call(sf.querySelectorAll('textarea'),function(t){var v=t.value.trim();if(v)any=true;fd.append(t.name,v)});
-    if(!any){sf.querySelector('textarea').focus();return}
+    [].forEach.call(sf.querySelectorAll('textarea'),function(t){var v=t.value.trim();if(v){any=true;fd.append(t.name,v)}});
+    [].forEach.call(sf.querySelectorAll('input[type=radio]:checked'),function(r){any=true;fd.append(r.name,r.value)});
+    if(!any)return;
     var btn=sf.querySelector('button'); btn.disabled=true; btn.textContent='送っています…';
     fetch(SURVEY_URL,{method:'POST',mode:'no-cors',body:fd}).then(function(){
       sv.classList.add('sent'); try{localStorage.setItem('aoyagi_survey_sent',today())}catch(e){}
