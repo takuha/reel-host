@@ -193,23 +193,11 @@ footer{margin-top:28px;text-align:center;font-size:11px;color:var(--sub);line-he
       <p class="note">※抽選の時期・方法・賞品の内容は店頭でご案内します。</p>
     </div>
 
-    <div class="card" id="survey">
-      <h2>お店へのアンケート</h2>
-      <p>よければ、今日のご感想を聞かせてください。お答えはお店だけが読み、メニューや接客をよくするために使います。口コミとして公開されることはありません。</p>
-      <form id="surveyForm">
-        <div class="q">青柳を何で知りましたか？<div class="chips"><label class="chip"><input type="radio" name="entry.2068002687" value="Instagram"><span>Instagram</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="食べログ"><span>食べログ</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="Googleマップ"><span>Googleマップ</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="知人の紹介"><span>知人の紹介</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="通りがかり"><span>通りがかり</span></label><label class="chip"><input type="radio" name="entry.2068002687" value="その他"><span>その他</span></label></div></div>
-        <label>「もっとこうだったら」と思ったことはありますか？<textarea name="entry.453504556" rows="2"></textarea></label>
-        <div class="q">また来たいと思いますか？<div class="chips"><label class="chip"><input type="radio" name="entry.1868107299" value="ぜひ"><span>ぜひ</span></label><label class="chip"><input type="radio" name="entry.1868107299" value="たぶん"><span>たぶん</span></label><label class="chip"><input type="radio" name="entry.1868107299" value="わからない"><span>わからない</span></label></div></div>
-        <button type="submit" class="survey-send">送る</button>
-      </form>
-      <p class="survey-done" id="surveyDone">ありがとうございました。いただいた声は、お店のみんなで読みます。</p>
-    </div>
-
     <div class="card">
       <h2>よければ、口コミもお願いします</h2>
       <p>今日の感想を聞かせてもらえると、とても励みになります。書いても書かなくても、景品は変わりません。</p>
       <div class="links">
-        <a href="https://search.google.com/local/writereview?placeid=ChIJbVAwajHnAGARpt0wzRJe6X4" target="_blank" rel="noopener">Google</a>
+        <a href="https://search.google.com/local/writereview?placeid=ChIJbVAwajHnAGARpt0wzRJe6X4" target="_blank" rel="noopener">Googleマップ</a>
         <a href="https://tabelog.com/osaka/A2701/A270201/27159293/" target="_blank" rel="noopener">食べログ</a>
       </div>
     </div>
@@ -355,21 +343,6 @@ var SND={bgm:'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjE
     if(fresh&&black)confetti();
     state.newStamp=false; save(state);
   }
-
-  var SURVEY_URL='https://docs.google.com/forms/d/e/1FAIpQLSe--R1paLGgPc5-XMspjkrAC6L1PpHk5uakiaSaKHC0v5UpNw/formResponse';
-  var sv=document.getElementById('survey'), sf=document.getElementById('surveyForm');
-  try{if(localStorage.getItem('aoyagi_survey_sent')===today())sv.classList.add('sent')}catch(e){}
-  sf.addEventListener('submit',function(e){
-    e.preventDefault();
-    var fd=new URLSearchParams(), any=false;
-    [].forEach.call(sf.querySelectorAll('textarea'),function(t){var v=t.value.trim();if(v){any=true;fd.append(t.name,v)}});
-    [].forEach.call(sf.querySelectorAll('input[type=radio]:checked'),function(r){any=true;fd.append(r.name,r.value)});
-    if(!any)return;
-    var btn=sf.querySelector('button'); btn.disabled=true; btn.textContent='送っています…';
-    fetch(SURVEY_URL,{method:'POST',mode:'no-cors',body:fd}).then(function(){
-      sv.classList.add('sent'); try{localStorage.setItem('aoyagi_survey_sent',today())}catch(e){}
-    }).catch(function(){btn.disabled=false;btn.textContent='送る（もう一度）'});
-  });
 
   function tick(){var n=new Date();document.getElementById('tClock').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2)}
   setInterval(tick,1000); tick();
