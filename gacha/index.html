@@ -164,7 +164,7 @@ footer{margin-top:28px;text-align:center;font-size:11px;color:var(--sub);line-he
     </div>
     <p class="tap-hint" id="hint"></p>
     <button class="btn btn-main" id="spin">ハンドルを回す</button>
-    <p class="rules">白豚（9匹）＝<b>ドリンク1杯 無料</b>　／　黒豚（1匹）＝<b>アグー豚 1人前</b><br>ご来店のお客様はどなたでも、1日1回まわせます。</p>
+    <p class="rules">白豚（9匹）＝<b>ドリンク1杯 無料</b><br><small>（ドリンクはサワー・ハイボール・さんぴん茶から）</small><br>黒豚（1匹）＝<b>アグー豚 1人前</b><br>ご来店のお客様はどなたでも、1日1回まわせます。</p>
   </section>
 
   <section class="result" id="result">
@@ -327,7 +327,7 @@ var SND={bgm:'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjE
     r.classList.toggle('black',black);
     document.getElementById('bigPig').innerHTML='<img alt="" src="'+(black?IMG_BLACK:IMG_WHITE)+'">';
     document.getElementById('kind').textContent=black?'黒豚（アグー豚）が出ました':'白豚が出ました';
-    document.getElementById('prize').textContent=black?'アグー豚 1人前 プレゼント':'ドリンク 1杯 無料';
+    document.getElementById('prize').textContent=black?'アグー豚 1人前 プレゼント':'ドリンク 1杯 無料（サワー・ハイボール・さんぴん茶）';
     var d=new Date(state.time);
     document.getElementById('tDate').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 ・ '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' に引いた券';
     document.getElementById('ticket').classList.toggle('is-used',!!state.used);
