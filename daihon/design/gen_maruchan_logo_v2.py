@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 FONT_MARU = "/System/Library/Fonts/ヒラギノ丸ゴ ProN W4.ttc"
 
-src = Image.open("/Users/takuha/Downloads/maruchan_badge_v1.png").convert("RGBA")
+src = Image.open("/home/araki/Downloads/maruchan_badge_v1.png").convert("RGBA")
 draw = ImageDraw.Draw(src)
 
 W, H = src.size
@@ -23,5 +23,5 @@ src = Image.alpha_composite(src, shadow)
 draw = ImageDraw.Draw(src)
 draw.text(pos, text, font=font, fill=(26, 24, 20, 255))
 
-src.convert("RGB").save("/Users/takuha/scripts/reel-host/daihon/design/maruchan_logo_v2.png", quality=95)
+src.convert("RGB").save("/home/araki/scripts/reel-host/daihon/design/maruchan_logo_v2.png", quality=95)
 print("done")

@@ -44,10 +44,10 @@ for fx, fy1, fy2 in [(-0.10, 0.30, 0.72), (0.05, 0.28, 0.75), (0.16, 0.32, 0.68)
     draw.line([(x, H * fy1), (x + W*0.02, H * fy2)], fill=(222, 220, 214), width=3)
 
 logo1 = load_logo_transparent(
-    "/Users/takuha/scripts/reel-host/daihon/design/maruchan_logo_v2.png", (237, 229, 209)
+    "/home/araki/scripts/reel-host/daihon/design/maruchan_logo_v2.png", (237, 229, 209)
 )
 logo2 = load_logo_transparent(
-    "/Users/takuha/scripts/reel-host/daihon/design/maruchan_badge2_mj_raw.png", (255, 255, 255)
+    "/home/araki/scripts/reel-host/daihon/design/maruchan_badge2_mj_raw.png", (255, 255, 255)
 )
 
 size1 = int(W * 0.20)
@@ -62,5 +62,5 @@ p2x = int(p1x + size1 + W * 0.02)
 p2y = int(p1y + size1 * 0.35)
 bg.paste(l2, (p2x, p2y), l2)
 
-bg.save("/Users/takuha/scripts/reel-host/daihon/design/maruchan_shirt_mockup_v2_2logos.png")
+bg.save("/home/araki/scripts/reel-host/daihon/design/maruchan_shirt_mockup_v2_2logos.png")
 print("done")

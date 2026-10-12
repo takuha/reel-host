@@ -76,6 +76,6 @@ def make_shirt_mockup(logo_img, path, size=(1080, 1350)):
 
     bg.save(path)
 
-logo = make_logo("/Users/takuha/scripts/reel-host/daihon/design/maruchan_logo_v1.png")
-make_shirt_mockup(logo, "/Users/takuha/scripts/reel-host/daihon/design/maruchan_shirt_mockup_v1.png")
+logo = make_logo("/home/araki/scripts/reel-host/daihon/design/maruchan_logo_v1.png")
+make_shirt_mockup(logo, "/home/araki/scripts/reel-host/daihon/design/maruchan_shirt_mockup_v1.png")
 print("done")
