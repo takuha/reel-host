@@ -70,6 +70,36 @@ li{margin:2px 0}
 table.todo tr.sub td{background:var(--sand);font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ai);padding:4px 8px}
 table.todo td:nth-child(2),table.todo td:nth-child(3){font-size:13px;min-width:6em}
 @media (min-width:640px){table.todo td:nth-child(2),table.todo td:nth-child(3){white-space:nowrap}}
+.zukai h3{margin-top:22px}
+.gauge{display:grid;gap:6px}
+.g-track{position:relative;height:34px;background:var(--sand);border-radius:4px}
+.g-fill{height:100%;background:var(--beni);border-radius:4px 0 0 4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;min-width:9.5em}
+.g-fill span{color:#fff;font-weight:700;font-size:13px;white-space:nowrap}
+.g-goal{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-3px;background:var(--ai)}
+.g-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.tl-wrap{overflow-x:auto}
+.tl{list-style:none;margin:0;padding:0 0 0 8px;display:grid;gap:0}
+.tl li{display:grid;grid-template-columns:7.5em 1fr;gap:10px;position:relative;padding:6px 0 6px 18px;border-left:2px solid var(--line)}
+.tl li::before{content:"";position:absolute;left:-7px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--ai)}
+.tl li.now::before{background:var(--ai)}
+.tl li.hot::before{background:var(--beni);border-color:var(--beni)}
+.tl li.hot b,.tl li.hot span{color:var(--beni)}
+.tl b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.tile{border-radius:6px;padding:10px;display:grid;gap:2px;min-width:0}
+.tile b{font-size:13.5px}.tile span{font-size:12px}
+.t-ok{background:var(--ok-bg);color:var(--ok)}.t-wait{background:var(--wait-bg);color:var(--wait)}
+.t-warn{background:var(--warn-bg);color:var(--warn)}.t-stop{background:var(--stop-bg);color:var(--stop)}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lg{font-size:11.5px;padding:1px 8px;border-radius:999px;font-weight:700}
+.who-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.pc{border:1px solid var(--line);border-radius:6px;overflow:hidden;min-width:0}
+.ph{background:var(--ai);color:var(--paper);font-weight:700;padding:6px 10px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ph small{font-weight:400;font-size:11px;opacity:.85}
+.oka-c .ph{background:var(--beni)}
+.pc ul{padding:8px 10px 10px 1.6em;font-size:13.5px}
+.pc em{font-style:normal;font-size:11.5px;color:var(--beni);font-weight:700;white-space:nowrap}
+
 footer{font-size:12px;color:var(--muted);text-align:center}
 </style></head><body>
 
@@ -80,6 +110,55 @@ footer{font-size:12px;color:var(--muted);text-align:center}
   <div class="attend"><span class="al">参加者</span><span>タカさん</span><span>ほっそん（沖縄から参加）</span><span>マサさん</span><span>荒木社長</span><span>こうちゃん</span><span>岡くん</span></div>
   <div class="meta">開店13日目・作成 ほっそん（AIちゃん下書き）／数字は食べログ予約・各SNS管理画面の記録から。取れていない数字は〔要記入〕で空けています。</div>
 </header>
+
+<section class="zukai" id="zukai">
+  <h2><span class="n">図解</span>ひと目でわかる青柳の今</h2>
+
+  <h3>① お客さんの数：目標の半分にまだ届いていない</h3>
+  <div class="gauge" aria-label="1日平均12名、目標27名">
+    <div class="g-track"><div class="g-fill" style="width:44.4%"><span>いま 1日平均 12名</span></div><div class="g-goal" style="left:100%"></div></div>
+    <div class="g-scale"><span>0</span><span>目標 1日27名（月800名）</span></div>
+    <p class="note">あと1日15名。平日（月・火・金）の空きを埋めるのが「AGU会」と「21時以降のお試しセット」。</p>
+  </div>
+
+  <h3>② この先の予定</h3>
+  <div class="tl-wrap"><ol class="tl">
+    <li class="now"><b>10/13 火</b><span>幹部ミーティング</span></li>
+    <li><b>10/14〜16</b><span>ほっそん沖縄出張・泡盛を仕入れ</span></li>
+    <li class="hot"><b>10/18 日</b><span>AGU会 第1回</span></li>
+    <li><b>10/19 月</b><span>口コミ 中間目標40件</span></li>
+    <li><b>10/24 土</b><span>AGU会 第2回</span></li>
+    <li class="hot"><b>10/27 火</b><span>貸切23名（満席）</span></li>
+    <li><b>10月末</b><span>一品メニュー4〜5品</span></li>
+    <li><b>11/1</b><span>LINE自動報告が再開（無料枠）</span></li>
+  </ol></div>
+
+  <h3>③ 持ち場の状態</h3>
+  <div class="tiles">
+    <div class="tile t-ok"><b>AGU会</b><span>準備完了</span></div>
+    <div class="tile t-ok"><b>泡盛・日本酒</b><span>原価出し済み</span></div>
+    <div class="tile t-ok"><b>求人</b><span>継続中・合格19人</span></div>
+    <div class="tile t-ok"><b>口コミ育成</b><span>毎週自動で計測</span></div>
+    <div class="tile t-wait"><b>ポスター・キャラ</b><span>投票待ち</span></div>
+    <div class="tile t-wait"><b>スタッフ用LINE</b><span>設計たたき台</span></div>
+    <div class="tile t-wait"><b>IG 位置情報</b><span>Metaの返事待ち</span></div>
+    <div class="tile t-warn"><b>マニュアル・指示書</b><span>岡くん確認中</span></div>
+    <div class="tile t-warn"><b>自動処理</b><span>Windowsへ移行中</span></div>
+    <div class="tile t-warn"><b>予約レポート</b><span>LINE枠切れで停止</span></div>
+    <div class="tile t-stop"><b>アグー豚ガチャ</b><span>一時停止中</span></div>
+  </div>
+  <div class="legend"><span class="lg t-ok">動いている</span><span class="lg t-wait">返事・判断待ち</span><span class="lg t-warn">止まりかけ</span><span class="lg t-stop">止めている</span></div>
+
+  <h3>④ 誰が何をやるか</h3>
+  <div class="who-grid">
+    <div class="pc"><div class="ph">ほっそん<small>集客・SNS・求人</small></div><ul><li>宮古島で泡盛を仕入れ <em>10/14〜16</em></li><li>ポスター印刷 <em>10/13</em></li><li>AGU会の告知・男性集め <em>10/18</em></li><li>ガチャ再開の確認</li></ul></div>
+    <div class="pc oka-c"><div class="ph">岡くん<small>店舗顧問・仕組みと味</small></div><ul><li>お試しセットの案 <em>今日</em></li><li>指示書9枚の印刷・掲示</li><li>一品メニューの試食会 <em>10月中</em></li><li>スープ・タレのレシピ化</li><li>原価の見直し <em>3月まで</em></li></ul></div>
+    <div class="pc"><div class="ph">荒木社長<small>代表</small></div><ul><li>10/14〜16の現場責任者 <em>今日</em></li><li>LINE自動報告の有料化 <em>今日</em></li><li>スタッフ用グループLINE</li><li>酒の業者・伝票を岡くんへ</li><li>動けるスタッフの人数</li></ul></div>
+    <div class="pc"><div class="ph">こうちゃん<small>店長・現場の判断</small></div><ul><li>10/14〜16の現場 <em>今日</em></li><li>AGU会2部の中身と原価 <em>10/18まで</em></li><li>レシピ化（岡くんと）</li></ul></div>
+    <div class="pc"><div class="ph">タカさん・マサさん<small>オーナー</small></div><ul><li>LINE自動報告の有料化 <em>今日</em></li><li>ポスター・キャラの投票 <em>今日</em></li></ul></div>
+  </div>
+</section>
+
 
 <section>
   <h2><span class="n">今日</span>決めたいこと</h2>
