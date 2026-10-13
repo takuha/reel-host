@@ -1,0 +1,269 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta property="og:title" content="青柳 幹部ミーティング資料 10/13"><meta property="og:description" content="今日決めたいこと・やることリスト・数字・進捗・岡くん報告"><title>青柳 幹部ミーティング 10/13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>*{box-sizing:border-box}body{margin:0}
+/* 1カラムの会議資料。上から「決めること→数字→事業別→岡くん報告→出張中の連絡」の順に読む */
+:root{
+  --bg:#f6f7f9; --paper:#ffffff; --ink:#1b2333; --muted:#5d6678; --line:#dde1e8;
+  --ai:#22386b;      /* 藍（紅型の地色） */
+  --beni:#c8402f;    /* 紅（シーサー・紅型の差し色） */
+  --sand:#efe9dc;
+  --ok:#2f7a4f; --warn:#a86a00; --stop:#b3261e; --wait:#4a5a86;
+  --ok-bg:#e6f2ea; --warn-bg:#fbf0dc; --stop-bg:#fbe6e4; --wait-bg:#e7ebf5;
+  --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151d; --paper:#181e29; --ink:#e7eaf0; --muted:#9aa3b5; --line:#2b3343;
+  --ai:#9fb4e8; --beni:#ef7a68; --sand:#2a2720;
+  --ok:#7fd1a0; --warn:#f0bd5c; --stop:#f08a80; --wait:#a9b8e0;
+  --ok-bg:#1c3326; --warn-bg:#3a2e14; --stop-bg:#3d1d1a; --wait-bg:#232b40; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151d; --paper:#181e29; --ink:#e7eaf0; --muted:#9aa3b5; --line:#2b3343;
+  --ai:#9fb4e8; --beni:#ef7a68; --sand:#2a2720;
+  --ok:#7fd1a0; --warn:#f0bd5c; --stop:#f08a80; --wait:#a9b8e0;
+  --ok-bg:#1c3326; --warn-bg:#3a2e14; --stop-bg:#3d1d1a; --wait-bg:#232b40; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.75}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:28px}
+header{display:grid;gap:6px;border-bottom:3px double var(--ai);padding-bottom:16px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--beni);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,5vw,36px);line-height:1.3;margin:0;color:var(--ai);text-wrap:balance}
+.meta{color:var(--muted);font-size:13px}
+.attend{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.attend span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;background:var(--paper)}
+.attend .al{border:none;background:none;padding:0 4px 0 0;font-weight:700;color:var(--ai);letter-spacing:.08em}
+h2{font-family:var(--display);font-size:22px;margin:0 0 12px;color:var(--ai);text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-family:var(--body);font-size:12px;color:var(--paper);background:var(--ai);border-radius:3px;padding:1px 7px;letter-spacing:.06em}
+h3{font-size:16px;margin:18px 0 6px}
+section{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:20px 18px}
+p{margin:0 0 8px}
+.note{font-size:12.5px;color:var(--muted)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.04em;white-space:nowrap}
+td.num{text-align:right;white-space:nowrap}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.ok{color:var(--ok);background:var(--ok-bg)} .warn{color:var(--warn);background:var(--warn-bg)}
+.stop{color:var(--stop);background:var(--stop-bg)} .wait{color:var(--wait);background:var(--wait-bg)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:2px;min-width:0}
+.kpi .v{font-family:var(--display);font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .s{font-size:12px;color:var(--muted)}
+ol.decide{margin:0;padding-left:1.4em;display:grid;gap:10px}
+ol.decide li::marker{color:var(--beni);font-weight:700}
+ol.decide b{display:block}
+.who{font-size:12px;color:var(--muted)}
+.bars{display:grid;gap:4px;margin-top:6px}
+.bar{display:grid;grid-template-columns:72px 1fr 52px;gap:8px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
+.bar .t{height:12px;background:var(--sand);border-radius:2px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--ai)}
+.bar.mark .t i{background:var(--beni)}
+.oka{border:2px solid var(--beni)}
+.oka h2{color:var(--beni)} .oka h2 .n{background:var(--beni)}
+.fill{display:inline-block;min-width:8em;border-bottom:1px dashed var(--muted);color:var(--muted);font-size:12px}
+ul{margin:0;padding-left:1.2em}
+li{margin:2px 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.cols>div{min-width:0}
+table.todo tr.sub td{background:var(--sand);font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ai);padding:4px 8px}
+table.todo td:nth-child(2),table.todo td:nth-child(3){font-size:13px;min-width:6em}
+@media (min-width:640px){table.todo td:nth-child(2),table.todo td:nth-child(3){white-space:nowrap}}
+footer{font-size:12px;color:var(--muted);text-align:center}
+</style></head><body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">あぐー豚しゃぶしゃぶ 青柳｜東心斎橋</div>
+  <h1>幹部ミーティング資料<br>10月13日（火）</h1>
+  <div class="attend"><span class="al">参加者</span><span>タカさん</span><span>ほっそん（沖縄から参加）</span><span>マサさん</span><span>荒木社長</span><span>こうちゃん</span><span>岡くん</span></div>
+  <div class="meta">開店13日目・作成 ほっそん（AIちゃん下書き）／数字は食べログ予約・各SNS管理画面の記録から。取れていない数字は〔要記入〕で空けています。</div>
+</header>
+
+<section>
+  <h2><span class="n">今日</span>決めたいこと</h2>
+  <ol class="decide">
+    <li><b>10/14（水）〜16（金）の現場責任者</b>ほっそんは10/13〜16沖縄出張。10/14は3組7名の予約（うち知り合い経由1件）。当日の対応者と、何かあった時の連絡先を決める。<div class="who">決める人：荒木社長・こうちゃん</div></li>
+    <li><b>ポスター（A/B/C）とキャラクター（あぐー豚×シーサー）の投票結果</b>10/12に幹部LINEで投票中。決まった案で印刷→沖縄で配る。Aは電話番号なし・「あぐー豚一人前プレゼント」の上限が未定。<div class="who">決める人：幹部全員</div></li>
+    <li><b>LINE自動報告（ホウレン君）を有料にするか</b>無料は月200通。グループ送信は人数分減るため、10月分は上限に達して11/1まで報告停止中。有料ライトプランは月5,000円〔金額は管理画面で要確認〕。スタッフ用グループLINEを作るなら有料が前提。<div class="who">決める人：荒木社長・タカさん</div></li>
+    <li><b>スタッフ用グループLINEを作るか（オープンチャットを閉じるか）</b>今は予約案内とシフトをスタッフが毎日手打ち。グループにすれば毎日13:00に予約と出勤者を自動で流せる。本名のLINEが見えるのを嫌がる人がいないか、荒木社長から一言聞いてほしい。<div class="who">決める人：荒木社長</div></li>
+    <li><b>21時以降の「お試しセット」の量と値段</b>2回転目（21時〜）が弱い問題の対策。岡くんの報告を聞いて決める。<div class="who">報告：岡くん／決める人：幹部</div></li>
+    <li><b>AGU会 第1回（10/18日 19:00）の集客分担</b>男性はほっそん、女性は主催メンバー。幹部の知り合いにも声をかけてもらえるか。</li>
+  </ol>
+</section>
+
+
+
+<section>
+  <h2><span class="n">TODO</span>やることリスト</h2>
+  <p class="note">誰が・いつまでに。担当や期限が空いているものは、今日の会議で決めます。</p>
+  <div class="tw"><table class="todo">
+    <tr><th>やること</th><th>担当</th><th>期限</th></tr>
+    <tr class="sub"><td colspan="3">今日〜今週</td></tr>
+    <tr><td>10/14〜16の現場責任者と緊急連絡先を決める</td><td>荒木社長・こうちゃん</td><td>10/13</td></tr>
+    <tr><td>ポスター・キャラの投票 → 選ばれた案で印刷</td><td>幹部全員 → ほっそん</td><td>10/13</td></tr>
+    <tr><td>ホウレン君（LINE自動報告）を有料にするか決める</td><td>荒木社長・タカさん</td><td>10/13</td></tr>
+    <tr><td>21時以降のお試しセットの量・値段・ドリンク価格の案を出す</td><td>岡くん</td><td>10/13</td></tr>
+    <tr><td>宮古島で泡盛を仕入れる（原価率30%以内の上限で）</td><td>ほっそん</td><td>10/14〜16</td></tr>
+    <tr><td>AGU会 第1回の告知を出す</td><td>ほっそん</td><td>〔要記入〕</td></tr>
+    <tr><td>AGU会 第1回の参加者集め（男性＝ほっそん／女性＝主催メンバー）</td><td>ほっそん・女性の主催メンバー</td><td>10/18</td></tr>
+    <tr><td>AGU会 2部「AGUアフター」の中身と原価を確認</td><td>こうちゃん</td><td>10/18まで</td></tr>
+    <tr class="sub"><td colspan="3">10月中</td></tr>
+    <tr><td>指示書9枚を直して5部ずつ印刷・掲示</td><td>岡くん</td><td>〔要記入〕</td></tr>
+    <tr><td>一品メニュー4〜5品の試作 → 試食会</td><td>岡くん＋現場</td><td>10月中</td></tr>
+    <tr><td>スープ・タレのレシピ化（比率を書く）</td><td>岡くん＋こうちゃん</td><td>〔要記入〕</td></tr>
+    <tr><td>酒の業者を埋める・伝票の写真を岡くんへ渡す</td><td>荒木社長 → 岡くん</td><td>〔要記入〕</td></tr>
+    <tr><td>スタッフ用グループLINEを作るか決める（本名が見えてよいか、スタッフに一言聞く）</td><td>荒木社長</td><td>〔要記入〕</td></tr>
+    <tr><td>実際に動けるスタッフの人数を確認</td><td>荒木社長・こうちゃん</td><td>〔要記入〕</td></tr>
+    <tr><td>会計時の口コミの声かけ担当を決める</td><td>〔要記入〕</td><td>10/19（中間目標40件）</td></tr>
+    <tr><td>ガチャの沖縄旅行抽選が景品表示法の上限内か確認 → 再開を決める</td><td>ほっそん</td><td>〔要記入〕</td></tr>
+    <tr class="sub"><td colspan="3">年末年始まで</td></tr>
+    <tr><td>貸切ルール（10名以上・奥のテーブル）と前金50%の決まりを文章にする</td><td>〔要記入〕</td><td>年末年始の予約受付前</td></tr>
+    <tr><td>食べログの予約を毎日チェックする担当を決める</td><td>荒木社長・岡くん</td><td>〔要記入〕</td></tr>
+    <tr><td>原価の見直し（スライサー・アグー豚のサブ業者）</td><td>岡くん</td><td>3月まで</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">数字</span>開店からの来店</h2>
+  <div class="kpis">
+    <div class="kpi"><span class="l">10/1〜10/9 来店</span><span class="v">109名</span><span class="s">34組・1日平均12名</span></div>
+    <div class="kpi"><span class="l">うち幹部・関係者の予約</span><span class="v">8組</span><span class="s">幹部・関係者の名義</span></div>
+    <div class="kpi"><span class="l">目標（月）</span><span class="v">800名</span><span class="s">1日あたり約27名</span></div>
+    <div class="kpi"><span class="l">10/27（火）</span><span class="v">23名</span><span class="s">貸切1組・満席</span></div>
+  </div>
+  <h3>1日ごとの来店人数（食べログ予約・来店済み）</h3>
+  <div class="bars" aria-label="1日ごとの来店人数">
+    <div class="bar"><span>10/1 木</span><span class="t"><i style="width:66.7%"></i></span><span>16名</span></div>
+    <div class="bar"><span>10/2 金</span><span class="t"><i style="width:54.2%"></i></span><span>13名</span></div>
+    <div class="bar"><span>10/3 土</span><span class="t"><i style="width:50%"></i></span><span>12名</span></div>
+    <div class="bar"><span>10/4 日</span><span class="t"><i style="width:50%"></i></span><span>12名</span></div>
+    <div class="bar"><span>10/5 月</span><span class="t"><i style="width:100%"></i></span><span>24名</span></div>
+    <div class="bar"><span>10/6 火</span><span class="t"><i style="width:50%"></i></span><span>12名</span></div>
+    <div class="bar"><span>10/7 水</span><span class="t"><i style="width:41.7%"></i></span><span>10名</span></div>
+    <div class="bar"><span>10/8 木</span><span class="t"><i style="width:33.3%"></i></span><span>8名</span></div>
+    <div class="bar"><span>10/9 金</span><span class="t"><i style="width:8.3%"></i></span><span>2名</span></div>
+    <div class="bar mark"><span>10/10 土</span><span class="t"><i style="width:79.2%"></i></span><span>19名</span></div>
+  </div>
+  <p class="note">10/10は予約数（来店確認前）。10/11以降の実績は自動取得が止まっていて未集計〔要記入〕。電話・飛び込みの来店はこの数字に入っていません。</p>
+
+  <h3>この先の予約（10/10時点）</h3>
+  <div class="tw"><table>
+    <tr><th>日付</th><th>予約</th><th>空き</th></tr>
+    <tr><td>10/11（日）</td><td>1組2名</td><td>残り5卓</td></tr>
+    <tr><td>10/12（月）・10/13（火）</td><td><span class="pill stop">予約なし</span></td><td>—</td></tr>
+    <tr><td>10/14（水）</td><td>3組7名</td><td>残り3卓</td></tr>
+    <tr><td>10/15（木）</td><td>1組4名</td><td>残り5卓</td></tr>
+    <tr><td>10/16（金）</td><td><span class="pill stop">予約なし</span></td><td>—</td></tr>
+    <tr><td>10/17（土）</td><td>3組8名</td><td>残り3卓</td></tr>
+    <tr><td>10/18（日）</td><td>2組7名＋AGU会 第1回</td><td>残り4卓</td></tr>
+    <tr><td>10/27（火）</td><td>1組23名（貸切）</td><td>満席</td></tr>
+  </table></div>
+  <p class="note">平日（月・火・金）が空いている。AGU会と21時以降のお試しセットはこの穴を埋めるための手。</p>
+
+  <h3>SNS・LINE・口コミ</h3>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>今の数字</th><th>読み方</th></tr>
+    <tr><td>Instagram フォロワー</td><td class="num">約380人</td><td>ほぼ大阪の人。リールは1本あたり約1,000回、最高約5,000回。保存・シェアはほぼ0</td></tr>
+    <tr><td>Instagram フォロー整理</td><td class="num">約1,000→900</td><td>片思いフォローを手で外し中。10月中に終わる</td></tr>
+    <tr><td>公式LINE 友だち</td><td class="num">117人</td><td>10/7時点・ブロック18。ガチャ告知の一斉配信でブロックは約2人</td></tr>
+    <tr><td>口コミ（Google＋食べログ）</td><td class="num">〔要記入〕</td><td>年末目標500件（現実ライン200〜250件）。中間目標＝10/19に40件。代筆・関係者の口コミは規約違反なので頼まない</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">進捗</span>持ち場ごとの状態</h2>
+  <div class="tw"><table>
+    <tr><th>持ち場</th><th>状態</th><th>いまどこまで進んだか</th></tr>
+    <tr><td>AGU会（食事&交流会）</td><td><span class="pill ok">準備完了</span></td><td>年内20回の日程を決定。第1回10/18（日）・第2回10/24（土）。申込フォーム→受付QR→カレンダーまで自動で動くことを確認済み。会は5種類（定番・経営者ナイト・主催メンバーのプロデュース・泡盛ナイト・旅好きナイト）。1部 男12,000／女4,000円、2部「AGUアフター」均一5,000円（仮）</td></tr>
+    <tr><td>泡盛・日本酒メニュー</td><td><span class="pill ok">原価出し済み</span></td><td>原価率13〜35%（18品）。一升瓶1本の売上は仕入れ値の2.9〜7.6倍。永平寺白龍だけ30%超え</td></tr>
+    <tr><td>ポスター・キャラクター</td><td><span class="pill wait">投票待ち</span></td><td>ポスター3案（QRは全部読み取り確認済み）・キャラ3案と名前3案（アグーサー／ブーサー／ワーサー）</td></tr>
+    <tr><td>アグー豚ガチャ</td><td><span class="pill stop">一時停止中</span></td><td>10/9から「準備中」表示。白豚のドリンクはサワー・ハイボール・さんぴん茶に限定（原価約77円）</td></tr>
+    <tr><td>食べログ予約レポート</td><td><span class="pill warn">止まっている</span></td><td>毎朝の予約画像3枚＋新規予約通知。LINEの無料枠を使い切り、10月分は停止。食べログへ「同時ログイン・スタッフ用アカウント」の問い合わせ文は作成済み</td></tr>
+    <tr><td>スタッフ用グループLINE</td><td><span class="pill wait">設計たたき台</span></td><td>オープンチャット20人の中身を棚卸し。毎日13:00に予約＋出勤者を1通流す設計。売上・目標はスタッフに出さない</td></tr>
+    <tr><td>店のマニュアル・指示書</td><td><span class="pill warn">岡くん確認中</span></td><td>指示書9枚（朝礼・接客・外国語・電話・掃除・衛生・盛り付け・開店10分前・体調チェック表）。岡くんのマニュアルを土台に1冊へまとめる</td></tr>
+    <tr><td>求人</td><td><span class="pill ok">継続中</span></td><td>合格19人（オープンチャットに在籍）。合格連絡が届いていなかった2人に本人確認中・1人は在籍が未確定。バイト募集の動画（スタッフの声 v9）は作成済み</td></tr>
+    <tr><td>口コミ育成</td><td><span class="pill ok">稼働中</span></td><td>毎週月曜に青柳と豚や葵の点数・件数を自動で取る。目標店＝豚や葵（食べログ3.50・Google4.2）</td></tr>
+    <tr><td>Instagram 位置情報</td><td><span class="pill wait">返事待ち</span></td><td>店の場所の表示についてMetaサポートへの問い合わせ文を10/12に作成</td></tr>
+    <tr><td>自動投稿・自動処理</td><td><span class="pill warn">移行中</span></td><td>Macで動かしていた青柳の自動処理を止めてWindowsへ移行中。終わるまで一部の自動報告が止まる</td></tr>
+  </table></div>
+</section>
+
+<section class="oka">
+  <h2><span class="n">報告</span>岡くんから（現場の進み具合と指示）</h2>
+  <p>岡くんには事前に下の項目を送っています。会議では空欄を埋める形で話してもらいます。</p>
+
+  <h3>A. 10/8 来店の結果</h3>
+  <div class="tw"><table>
+    <tr><th>お願いしていたこと</th><th>結果</th></tr>
+    <tr><td>指示書9枚のチェック（OKなら5部ずつ印刷）</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>出勤時刻：キッチン16:00・ホール17:00に分けるか</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>衛生ルールは岡くん版（HACCPの表）を正本にするか</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>閉店チェックを1枚にまとめるか</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>店舗情報（席数・キャンセル規定・支払方法・アレルギー方針・責任者連絡先）</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>器の見直し・卓ごとの提供チェック表（磁石）の置き場所・テーブルセッティング写真</td><td><span class="fill">〔岡くん〕</span></td></tr>
+  </table></div>
+
+  <h3>B. 商品開発</h3>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>状態</th></tr>
+    <tr><td>一品メニュー4〜5品（10月中に増やす）：品名・必要な食材と量・試食会の日</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>21時以降のお試しセット：量（1/2か1/3）・値段・ドリンクの値段</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>スープ・タレのレシピ化：いつ・誰と</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>もずく（冷やして出す・もずくキムチ案）／海ぶどう（仕入れ先と保存）</td><td><span class="fill">〔岡くん〕</span></td></tr>
+  </table></div>
+
+  <h3>C. 仕入れ・原価</h3>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>状態</th></tr>
+    <tr><td>業者一覧：肉・野菜・一品・キムチは決まっている。<b>酒の業者だけ空欄</b></td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>伝票の写真（単価）→業者見積もりの提案</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>アグー豚のサブ業者（欠品時用）</td><td><span class="fill">〔岡くん〕</span></td></tr>
+  </table></div>
+
+  <h3>D. 10/2の改善7つの進み</h3>
+  <div class="tw"><table>
+    <tr><th>改善</th><th>状態</th></tr>
+    <tr><td>予約ホワイトボードをキッチン内へ</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>キッチンモップをフックに掛ける</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>アルコール用容器の変更</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>トイレのゴミ捨てを最終チェックに</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>テーブルセッティングの型（お箸の向き）を共有</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>営業中の喋り声の声量</td><td><span class="fill">〔岡くん〕</span></td></tr>
+    <tr><td>卓ごとの提供状況チェック表</td><td><span class="fill">〔岡くん〕</span></td></tr>
+  </table></div>
+
+  <h3>E. 年末年始に向けて決めておくこと</h3>
+  <ul>
+    <li>貸切は10名以上・奥のテーブル席（10〜12席）</li>
+    <li>貸切・年末年始の団体は前金50%を振込で受けて確定、残りは当日払い</li>
+    <li>食べログの予約チェックを誰が毎日見るか（荒木社長と岡くんの分担）</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">出張</span>10/13〜16 ほっそん不在中</h2>
+  <div class="cols">
+    <div>
+      <h3>沖縄・宮古島でやること</h3>
+      <ul>
+        <li>泡盛の仕入れ（宮古島の酒造所）</li>
+        <li>青柳のチラシ配り・宣伝</li>
+        <li>なかやまへのあいさつ</li>
+      </ul>
+    </div>
+    <div>
+      <h3>不在中の連絡</h3>
+      <ul>
+        <li>LINEは見られる。返事が遅れることがある</li>
+        <li>現場の判断は店長こうちゃん、仕組みと味は岡くん</li>
+        <li>急ぎの電話：〔要記入〕</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>出典：食べログ予約の日次記録（10/1〜10/10）・泡盛原価報告（10/7）・SNS現状報告（10/10）・求人ファネル実数（10/7・10/11更新）・店舗顧問打ち合わせ議事録（9/29）・作戦室LINE（10/5〜6）</footer>
+</div>
+</body></html>
