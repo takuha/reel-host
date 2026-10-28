@@ -541,7 +541,7 @@ main() {
 	threads) cmd_threads "$@" ;;
 	send) cmd_send "$@" ;;
 	'' | -h | --help | help) usage ;;
-	*) die "知らないコマンド: $command（reel_dm.sh --help）" ;;
+	*) die "知らないコマンド: ${command}（reel_dm.sh --help）" ;;
 	esac
 }
 

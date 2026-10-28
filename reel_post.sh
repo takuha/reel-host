@@ -452,7 +452,7 @@ main() {
 	publish) cmd_publish "$@" ;;
 	next) cmd_next "$@" ;;
 	'' | -h | --help | help) usage ;;
-	*) die "知らないコマンド: $command（reel_post.sh --help）" ;;
+	*) die "知らないコマンド: ${command}（reel_post.sh --help）" ;;
 	esac
 }
 

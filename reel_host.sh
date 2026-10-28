@@ -60,7 +60,7 @@ require_branch() {
 	local current
 	current="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)"
 	[ "$current" = "$BRANCH" ] ||
-		die "$BRANCH ブランチで実行すること（今は $current）。GitHub Pages は $BRANCH から配信される。"
+		die "$BRANCH ブランチで実行すること（今は ${current}）。GitHub Pages は $BRANCH から配信される。"
 }
 
 push_change() {
@@ -193,7 +193,7 @@ main() {
 	next) cmd_next "$@" ;;
 	clean) cmd_clean "$@" ;;
 	'' | -h | --help | help) usage ;;
-	*) die "知らないコマンド: $command（reel_host.sh --help）" ;;
+	*) die "知らないコマンド: ${command}（reel_host.sh --help）" ;;
 	esac
 }
 
